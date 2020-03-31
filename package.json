@@ -1,0 +1,39 @@
+{
+	"name": "browser-trivia",
+	"version": "0.1.0",
+	"description": "Create your own trivia and host a game with your friends 🎉",
+	"main": "server.js",
+	"author": "Sam Sverko",
+	"license": "MIT",
+	"private": true,
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/SamSverko/browser-trivia.git"
+	},
+	"scripts": {
+		"build-css": "sass app/public/styles/sass:app/public/styles",
+		"dev-restart": "pm2 restart ecosystem.config.js --only browser-trivia-dev",
+		"dev-start": "pm2 start ecosystem.config.js --only browser-trivia-dev --watch && npm run dev-watch-css",
+		"dev-stop": "pm2 stop ecosystem.config.js --only browser-trivia-dev",
+		"dev-watch-css": "sass --watch app/public/styles/sass:app/public/styles",
+		"restart": "pm2 restart ecosystem.config.js --only browser-trivia",
+		"start": "pm2 start ecosystem.config.js --only browser-trivia",
+		"stop": "pm2 stop ecosystem.config.js --only browser-trivia",
+		"test": "standard"
+	},
+	"dependencies": {
+		"compression": "^1.7.4",
+		"dotenv": "^8.2.0",
+		"express": "^4.17.1",
+		"express-handlebars": "^3.1.0",
+		"express-validator": "^6.4.0",
+		"helmet": "^3.21.2",
+		"mongodb": "^3.5.2",
+		"pm2": "^4.2.3",
+		"sass": "^1.25.0"
+	},
+	"devDependencies": {
+		"minimist": ">=1.2.2",
+		"standard": "^14.3.1"
+	}
+}

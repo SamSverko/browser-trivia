@@ -1,0 +1,33 @@
+.host__add-a-round {
+  background-color: grey;
+  color: black;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  text-align: center;
+  width: 100%;
+  div {
+    border: 1px solid black;
+    border-radius: 5px;
+    box-sizing: border-box;
+    cursor: pointer;
+    margin: 20px;
+    padding: 10px;
+    width: calc(33% - 40px);
+    p {
+      &:last-child {
+        font-size: 0.85em;
+      }
+    }
+    &:hover {
+      background-color: indigo;
+      p {
+        color: white;
+      }
+    }
+  }
+  .host__add-a-round__title {
+    width: 100%;
+  }
+}

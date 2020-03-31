@@ -1,0 +1,33 @@
+.host__add-a-round {
+  background-color: grey;
+  color: black;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  text-align: center;
+  width: 100%;
+}
+.host__add-a-round div {
+  border: 1px solid black;
+  border-radius: 5px;
+  box-sizing: border-box;
+  cursor: pointer;
+  margin: 20px;
+  padding: 10px;
+  width: calc(33% - 40px);
+}
+.host__add-a-round div p:last-child {
+  font-size: 0.85em;
+}
+.host__add-a-round div:hover {
+  background-color: indigo;
+}
+.host__add-a-round div:hover p {
+  color: white;
+}
+.host__add-a-round .host__add-a-round__title {
+  width: 100%;
+}
+
+/*# sourceMappingURL=host.css.map */

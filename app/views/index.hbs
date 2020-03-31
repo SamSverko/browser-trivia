@@ -1,0 +1,20 @@
+<h1>Welcome to browser-trivia 🎉</h1>
+
+<form action="/host" method="post">
+  <label for="form-index-host-name">Name</label>
+  <input id="form-index-host-title" name="host-index-name" required type="text">
+  <br />
+  <input id="form-index-host-submit" name="host-index-submit" type="submit" value="Host">
+</form>
+
+<hr />
+
+<form action={{currentPage}} method="post">
+  <label for="form-player-name">Name</label>
+  <input id="form-player-title" name="player-name" required type="text">
+  <br />
+  <label for="form-player-code">Room code</label>
+  <input id="form-player-code" name="player-code" required type="text">
+  <br />
+  <input id="form-player-submit" name="player-submit" type="submit" value="Join">
+</form>
