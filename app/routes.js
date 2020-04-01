@@ -20,7 +20,7 @@ const DbController = require('./controllers/db.js')
 
 // routes
 router.get('/', (req, res) => {
-  console.log(`GET request for ${req.url}.`)
+  console.log(`${req.method} request for ${req.url}.`)
 
   res.render('index', {
     title: 'Home',
@@ -29,27 +29,23 @@ router.get('/', (req, res) => {
   })
 })
 
+router.get('/host/:triviaId', (req, res, next) => {
+  console.log(`${req.method} request for ${req.url}.`)
+
+  DbController.findTrivia(req, res, next)
+})
+
 router.get('/host', (req, res) => {
-  console.log(`GET request for ${req.url}.`)
+  console.log(`${req.method} request for ${req.url}.`)
 
-  const returnedData = {
-    triviaId: 'abcd',
-    host: 'sam'
-  }
-
-  res.render('host', {
-    title: 'Host (TEST)',
-    data: returnedData,
-    scripts: [{ file: 'host' }],
-    styles: [{ file: 'host' }]
-  })
+  res.redirect('/')
 })
 
 router.post('/host', [
   body('host-index-name').isString().trim().escape(),
   body('host-index-submit').isString().trim().escape()
 ], (req, res, next) => {
-  console.log(`POST request for ${req.url}.`)
+  console.log(`${req.method} request for ${req.url}.`)
 
   // return any errors
   const validationErrors = validationResult(req)
@@ -61,6 +57,12 @@ router.post('/host', [
   }
 
   DbController.insertNewTrivia(req, res, next)
+})
+
+router.post('/host/:triviaId', (req, res) => {
+  console.log(`${req.method} request for ${req.url}.`)
+
+  res.send('Ok')
 })
 
 // server error handler test page

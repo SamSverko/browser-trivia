@@ -1,10 +1,11 @@
-<h1>Your trivia, {{data.host}} 👑</h1>
+<script>const triviaData = {{{triviaData}}}</script>
 
-<p>Your trivia room code: {{data.triviaId}}</p>
+<h1>Your trivia, <span id="hostName"></span> 👑</h1>
+<p>Your trivia room code: <span id="hostTriviaId"></span></p>
 
 <hr />
 
-<form action="/host" method="POST">
+<form id="hostForm" method="POST">
   <div class="host__add-a-round">
     <p class="host__add-a-round__title">Add a round</p>
     <div>
@@ -23,7 +24,7 @@
 
   <hr />
 
-  <input disabled id="form-host-submit" name="host-submit" type="submit" value="Host trivia!">
+  <input id="form-host-submit" name="host-submit" type="submit" value="Host trivia!">
   <p>Steps needed to enable the "Host trivia!" button:</p>
   <ol>
     <li>Add at least 1 round.</li>
