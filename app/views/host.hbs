@@ -5,24 +5,40 @@
 
 <hr />
 
-<form id="hostForm" method="POST">
-  <div class="host__add-a-round">
-    <p class="host__add-a-round__title">Add a round</p>
-    <div>
+<div class="rounds">
+  <h2>Rounds</h2>
+
+  <div class="rounds__select-type">
+    <p class="rounds__select-type__title">Add a round</p>
+    <div id="roundTypeMultiple">
       <p>Multiple Choice</p>
       <p>Players guess either A, B, C, or D.</p>
     </div>
-    <div>
+    <div id="roundTypePicture">
       <p>Picture</p>
       <p>Players guess the image.</p>
     </div>
-    <div>
+    <div id="roundTypeLightning">
       <p>Lightning</p>
       <p>Players must provide exact answer.</p>
     </div>
   </div>
 
-  <hr />
+  <div class="rounds__to-add">
+    <p class="rounds__to-add__title">Add a </p>
+    <form class="rounds__to-add__multiple-choice" method="POST">
+      <div class="rounds__to-add__multiple-choice__questions">
+        <p>Hello</p>
+      </div>
+    <button class="rounds__to-add__multiple-choice__add-question">Add a question</button>
+    <input class="rounds__to-add__multiple-choice__save" type="submit" value="Save Round">
+    </form>
+  </div>
+</div>
+
+<hr />
+
+<form id="hostForm" method="POST">
 
   <input id="form-host-submit" name="host-submit" type="submit" value="Host trivia!">
   <p>Steps needed to enable the "Host trivia!" button:</p>

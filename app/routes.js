@@ -59,8 +59,12 @@ router.post('/host', [
   DbController.insertNewTrivia(req, res, next)
 })
 
-router.post('/host/:triviaId', (req, res) => {
+router.post('/host/:triviaId', (req, res, next) => {
   console.log(`${req.method} request for ${req.url}.`)
+
+  console.log(req.query)
+  console.log(req.body)
+  console.log(req.body.rounds[0].questions)
 
   res.send('Ok')
 })

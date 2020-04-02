@@ -1,14 +1,14 @@
-.host__add-a-round {
+.rounds__select-type {
   background-color: grey;
   color: black;
-  display: flex;
+  display: none;
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: center;
   text-align: center;
   width: 100%;
 }
-.host__add-a-round div {
+.rounds__select-type div {
   border: 1px solid black;
   border-radius: 5px;
   box-sizing: border-box;
@@ -17,17 +17,29 @@
   padding: 10px;
   width: calc(33% - 40px);
 }
-.host__add-a-round div p:last-child {
+.rounds__select-type div p:last-child {
   font-size: 0.85em;
 }
-.host__add-a-round div:hover {
+.rounds__select-type div:hover {
   background-color: indigo;
 }
-.host__add-a-round div:hover p {
+.rounds__select-type div:hover p {
   color: white;
 }
-.host__add-a-round .host__add-a-round__title {
+.rounds__select-type .rounds__select-type__title {
   width: 100%;
+}
+
+.rounds__to-add {
+  display: none;
+  flex-direction: column;
+}
+.rounds__to-add .rounds__to-add__multiple-choice {
+  display: none;
+  flex-direction: column;
+}
+.rounds__to-add .rounds__to-add__multiple-choice__add-question {
+  display: block;
 }
 
 /*# sourceMappingURL=host.css.map */

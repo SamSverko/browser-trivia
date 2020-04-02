@@ -1,7 +1,7 @@
-.host__add-a-round {
+.rounds__select-type {
   background-color: grey;
   color: black;
-  display: flex;
+  display: none;
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: center;
@@ -27,7 +27,19 @@
       }
     }
   }
-  .host__add-a-round__title {
+  .rounds__select-type__title {
     width: 100%;
+  }
+}
+
+.rounds__to-add {
+  display: none;
+  flex-direction: column;
+  .rounds__to-add__multiple-choice {
+    display: none;
+    flex-direction: column;
+  }
+  .rounds__to-add__multiple-choice__add-question {
+    display: block;
   }
 }
