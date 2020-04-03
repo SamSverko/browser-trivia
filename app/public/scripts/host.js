@@ -49,7 +49,7 @@ function addRound () {
 function addMultipleChoiceQuestion () {
   const roundNumber = 0
   const questionNumber = 1 + (document.getElementsByClassName('rounds__to-add__multiple-choice__questions__question').length)
-  let htmlToInsert = (questionNumber === 1) ? `<input name="rounds[${roundNumber}][roundType]" type="hidden" value="multipleChoice" />` : ''
+  let htmlToInsert = (questionNumber === 1) ? `<input name="rounds[${roundNumber}][type]" type="hidden" value="multipleChoice" />` : ''
   htmlToInsert += `
     <label class="rounds__to-add__multiple-choice__questions__question" for="round${roundNumber}Question${questionNumber}Question">Question ${questionNumber}</label>
     <input id="multiple${questionNumber}Question" name="rounds[${roundNumber}][questions][${questionNumber}][question]" required type="text">

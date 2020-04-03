@@ -59,14 +59,23 @@ router.post('/host', [
   DbController.insertNewTrivia(req, res, next)
 })
 
-router.post('/host/:triviaId', (req, res, next) => {
+router.post('/host/:triviaId', [
+  body('rounds.*.type').isString().trim().escape(),
+  body('rounds.*.questions').isArray().notEmpty(),
+  body('rounds.*.questions.*.answer').toInt()
+], (req, res, next) => {
   console.log(`${req.method} request for ${req.url}.`)
 
-  console.log(req.query)
-  console.log(req.body)
-  console.log(req.body.rounds[0].questions)
+  // return any errors
+  const validationErrors = validationResult(req)
+  if (!validationErrors.isEmpty()) {
+    const error = new Error()
+    error.statusCode = 422
+    error.message = `Form validation failed:<br /><pre><code>${JSON.stringify(validationErrors.array(), undefined, 2)}</code></pre>`
+    return next(error)
+  }
 
-  res.send('Ok')
+  DbController.updateExistingTrivia(req, res, next)
 })
 
 // server error handler test page

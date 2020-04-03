@@ -60,5 +60,22 @@ module.exports = {
         styles: [{ file: 'host' }]
       })
     })
+  },
+  updateExistingTrivia: async (req, res, next) => {
+    console.log(req.body.rounds)
+    req.app.db.collection(process.env.DB_COLLECTION_NAME).updateOne({ triviaId: req.params.triviaId },
+      {
+        $set: {
+          rounds: req.body.rounds
+        }
+      }, (error, result) => {
+        if (error) {
+          const error = new Error()
+          error.statusCode = 400
+          error.message = error
+          next(error)
+        }
+        res.send(result)
+      })
   }
 }
