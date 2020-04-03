@@ -2,7 +2,7 @@
 
 // on page load
 document.addEventListener('DOMContentLoaded', () => {
-  console.log(triviaData)
+  // console.log(triviaData)
 
   // update page title display
   document.getElementById('hostName').innerHTML = triviaData.host
@@ -13,9 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // update rounds display
   if ('rounds' in triviaData && triviaData.rounds !== null) {
-    console.log('You have at least one round')
-  } else {
-    console.log('You have no rounds')
+    displayExistingRounds()
   }
 
   // add event listeners to add a round buttons
@@ -159,13 +157,60 @@ function addAdditionalQuestion (roundType) {
 function checkTriviaStatus () {
   const hostTriviaButton = document.querySelector('.host-trivia-form__submit')
   const hostTriviaHelp = document.querySelector('.host-trivia-form__submit-help')
+  // hide form host submit if rounds exist, display if no rounds exist
   if ('rounds' in triviaData && triviaData.rounds !== null) {
-    console.log('READY!')
     hostTriviaButton.disabled = false
     hostTriviaHelp.style.display = 'none'
   } else {
-    console.log('NOT READY')
     hostTriviaButton.disabled = true
     hostTriviaHelp.style.display = 'block'
   }
+}
+
+// display saved rounds
+function displayExistingRounds () {
+  let htmlToInsert = ''
+  for (let i = 0; i < triviaData.rounds.length; i++) {
+    const roundType = (triviaData.rounds[i].type === 'multipleChoice') ? 'multiple choice' : triviaData.rounds[i].type
+    const questionOrPicture = (triviaData.rounds[i].type === 'picture') ? 'pictures' : 'questions'
+    const numberOfQuestions = (triviaData.rounds[i].type === 'picture') ? triviaData.rounds[i].pictures.length : triviaData.rounds[i].questions.length
+    htmlToInsert += `
+      <div class="rounds__existing__round">
+        <p>Round ${i+1}</p>
+        <p>Type: ${roundType}</p>
+        <p>Number of ${questionOrPicture}: ${numberOfQuestions}</p>
+        <details>
+          <summary>${questionOrPicture}</summary>
+    `
+    for (let j = 0; j < triviaData.rounds[i][questionOrPicture].length; j++) {
+      if (triviaData.rounds[i].type === 'multipleChoice') {
+        htmlToInsert += `
+          <p>Question: ${triviaData.rounds[i][questionOrPicture][j].question}</p>
+          <p>Answer: ${triviaData.rounds[i][questionOrPicture][j].options[triviaData.rounds[i][questionOrPicture][j].answer]}</p>
+          <p>Options:</p>
+          <ul>
+            <li>${triviaData.rounds[i][questionOrPicture][j].options[0]}</li>
+            <li>${triviaData.rounds[i][questionOrPicture][j].options[1]}</li>
+            <li>${triviaData.rounds[i][questionOrPicture][j].options[2]}</li>
+            <li>${triviaData.rounds[i][questionOrPicture][j].options[3]}</li>
+          </ul>
+        `
+      } else if (triviaData.rounds[i].type === 'picture') {
+        htmlToInsert += `
+          <p>URL: ${triviaData.rounds[i][questionOrPicture][j].url}</p>
+          <p>Answer: ${triviaData.rounds[i][questionOrPicture][j].answer}</p>
+        `
+      } else if (triviaData.rounds[i].type === 'lightning') {
+        htmlToInsert += `
+          <p>Question: ${triviaData.rounds[i][questionOrPicture][j].question}</p>
+          <p>Answer: ${triviaData.rounds[i][questionOrPicture][j].answer}</p>
+        `
+      }
+    }
+    htmlToInsert += `
+        </details>
+      </div>
+    `
+  }
+  document.querySelector('.rounds__existing').insertAdjacentHTML('beforeend', htmlToInsert)
 }
