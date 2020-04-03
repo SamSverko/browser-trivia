@@ -50,7 +50,7 @@ function addRound () {
   const roundTitle = document.querySelector('.rounds__to-add__title')
 
   // Round cancel button
-  document.querySelector('.rounds__to-add__form__cancel').addEventListener('click', (event) => {
+  document.querySelector('.rounds__to-add__form__cancel-round').addEventListener('click', (event) => {
     event.preventDefault()
     window.location.reload(false)
   })
