@@ -24,9 +24,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // toggle tie breaker display
   checkTieBreakerStatus()
+  document.querySelector('.tie-breaker__edit').addEventListener('click', () => {
+    // hide existing tie breaker and show tie breaker form
+    document.querySelector('.tie-breaker__add').style.display = 'block'
+    document.querySelector('.tie-breaker').style.display = 'none'
+    document.getElementById('tieBreakerQuestion').value = triviaData.tieBreaker.question
+    document.getElementById('tieBreakerAnswer').value = triviaData.tieBreaker.answer
+  })
 
   // check trivia status
   checkTriviaStatus()
+
+  // test image validation script
+  validateImageUrl()
 }, false)
 
 // adding a new round
@@ -242,8 +252,10 @@ function displayExistingRounds () {
 }
 
 function validateImageUrl (event) {
-  if (event.target.value.length > 0) {
-    imageValidation(event.target.value, event.target)
+  if (event) {
+    if (event.target.value.length > 0) {
+      imageValidation(event.target.value, event.target)
+    }
   }
 }
 
