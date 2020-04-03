@@ -42,8 +42,8 @@ router.get('/host', (req, res) => {
 })
 
 router.post('/host', [
-  body('host-index-name').isString().trim().escape(),
-  body('host-index-submit').isString().trim().escape()
+  body('host-index-name').isString().notEmpty().trim().escape(),
+  body('host-index-submit').isString().notEmpty().trim().escape()
 ], (req, res, next) => {
   console.log(`${req.method} request for ${req.url}.`)
 
@@ -61,13 +61,15 @@ router.post('/host', [
 
 router.post('/host/:triviaId', [
   body('type').isString().isIn(['multipleChoice', 'picture', 'lightning']),
+  body('theme').isString().trim().escape(),
   body('questions').isArray().notEmpty().optional(),
-  body('questions.*.question').isString().notEmpty().trim().escape(),
-  body('questions.*.options.*').isString().notEmpty().trim().escape(),
-  body('questions.*.answer').toInt().isIn([0, 1, 2, 3]),
-  body('theme').isString().notEmpty().trim().escape().optional(),
+  body('questions.*.question').isString().notEmpty().trim().escape().optional(),
+  body('questions.*.options.*').isString().notEmpty().trim().escape().optional(),
+  body('questions.*.answer').toInt().isIn([0, 1, 2, 3]).optional(),
   body('pictures.*.url').isString().notEmpty().trim().escape().optional(),
-  body('pictures.*.answer').isString().notEmpty().trim().escape().optional()
+  body('pictures.*.answer').isString().notEmpty().trim().escape().optional(),
+  body('questions.*.lightningQuestion').isString().notEmpty().trim().escape().optional(),
+  body('questions.*.lightningAnswer').isString().notEmpty().trim().escape().optional()
 ], (req, res, next) => {
   console.log(`${req.method} request for ${req.url}.`)
 
@@ -80,10 +82,10 @@ router.post('/host/:triviaId', [
     return next(error)
   }
 
-  if (req.query.addRound === 'multipleChoice' || req.query.addRound === 'picture') {
+  if (req.query.addRound === 'multipleChoice' || req.query.addRound === 'picture' || req.query.addRound === 'lightning') {
     DbController.updateExistingTrivia(req, res, next)
   } else {
-    res.send('nurfin')
+    res.send('unknown round type.')
   }
 })
 

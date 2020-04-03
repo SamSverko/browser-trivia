@@ -64,12 +64,20 @@ module.exports = {
   updateExistingTrivia: async (req, res, next) => {
     const roundToInsert = {}
     roundToInsert.type = req.body.type
+    roundToInsert.theme = (req.body.theme !== '') ? req.body.theme : 'none'
     if (req.query.addRound === 'multipleChoice') {
       roundToInsert.questions = req.body.questions
-    }
-    if (req.query.addRound === 'picture') {
-      roundToInsert.theme = req.body.theme
+    } else if (req.query.addRound === 'picture') {
       roundToInsert.pictures = req.body.pictures
+    } else if (req.query.addRound === 'lightning') {
+      const fixedQuestionKeys = []
+      for (let i = 0; i < req.body.questions.length; i++) {
+        fixedQuestionKeys.push({
+          question: req.body.questions[i].lightningQuestion,
+          answer: req.body.questions[i].lightningAnswer
+        })
+      }
+      roundToInsert.questions = fixedQuestionKeys
     }
 
     req.app.db.collection(process.env.DB_COLLECTION_NAME).updateOne({ triviaId: req.params.triviaId },

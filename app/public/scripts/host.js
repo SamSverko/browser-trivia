@@ -1,6 +1,6 @@
 /* global triviaData */
 
-// executed on page load
+// on page load
 document.addEventListener('DOMContentLoaded', () => {
   console.log(triviaData)
 
@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('roundTypeLightning').addEventListener('click', addRound)
 }, false)
 
-// when adding a new round
+// adding a new round
 function addRound () {
   // hide add a round selection and display current round you are adding
   document.querySelector('.rounds__select-type').style.display = 'none'
@@ -43,6 +43,14 @@ function addRound () {
   if (this.id === 'roundTypeMultiple') {
     // update round title
     roundTitle.innerHTML += 'Multiple Choice round'
+    // insert relevant add a round form data
+    const htmlToInsert = `
+      <input name="type" type="hidden" value="multipleChoice" />
+      <label for="multipleTheme">Theme (can leave blank if none)</label>
+      <input id="multipleTheme" name="theme" type="text">
+      <br />
+    `
+    document.querySelector('.rounds__to-add__form__questions').insertAdjacentHTML('beforeend', htmlToInsert)
     // add additional question button
     document.querySelector('.rounds__to-add__form__add-question').addEventListener('click', (event) => {
       event.preventDefault()
@@ -56,23 +64,38 @@ function addRound () {
     // insert relevant add a round form data
     const htmlToInsert = `
       <input name="type" type="hidden" value="picture" />
-      <label for="pictureTheme">Picture theme</label>
-      <input id="pictureTheme" name="theme" required type="text">
+      <label for="pictureTheme">Theme (can leave blank if none)</label>
+      <input id="pictureTheme" name="theme" type="text">
       <br />
     `
     document.querySelector('.rounds__to-add__form__questions').insertAdjacentHTML('beforeend', htmlToInsert)
     // change from 'answer' to 'picture'
     document.querySelector('.rounds__to-add__form__add-question').innerHTML = 'Add a picture'
-
+    // add additional question button
     document.querySelector('.rounds__to-add__form__add-question').addEventListener('click', (event) => {
       event.preventDefault()
       addAdditionalQuestion('picture')
     })
     // update add a round form action
     document.querySelector('.rounds__to-add__form').action = `/host/${triviaData.triviaId}?addRound=picture`
-  } else {
+  } else if (this.id === 'roundTypeLightning') {
     // update round title
     roundTitle.innerHTML += 'Lightning round'
+    // insert relevant add a round form data
+    const htmlToInsert = `
+      <input name="type" type="hidden" value="lightning" />
+      <label for="lightningTheme">Theme (can leave blank if none)</label>
+      <input id="lightningTheme" name="theme" type="text">
+      <br />
+    `
+    document.querySelector('.rounds__to-add__form__questions').insertAdjacentHTML('beforeend', htmlToInsert)
+    // add additional question button
+    document.querySelector('.rounds__to-add__form__add-question').addEventListener('click', (event) => {
+      event.preventDefault()
+      addAdditionalQuestion('lightning')
+    })
+    // update add a round form action
+    document.querySelector('.rounds__to-add__form').action = `/host/${triviaData.triviaId}?addRound=lightning`
   }
 }
 
@@ -82,8 +105,6 @@ function addAdditionalQuestion (roundType) {
   const questionNumber = 1 + (document.getElementsByClassName('rounds__to-add__form__questions__question').length)
   let htmlToInsert = ''
   if (roundType === 'multipleChoice') {
-    // insert relevant add a round form data
-    htmlToInsert += (questionNumber === 1) ? '<input name="type" type="hidden" value="multipleChoice" />' : ''
     // new question form fields
     htmlToInsert += `
       <label class="rounds__to-add__form__questions__question" for="multipleQuestion${questionNumber}">Question ${questionNumber}</label>
@@ -116,6 +137,15 @@ function addAdditionalQuestion (roundType) {
       <input id="pictureUrl${questionNumber}" name="[pictures][${questionNumber}][url]" required type="text">
       <label for="pictureAnswer${questionNumber}">Answer</label>
       <input id="pictureAnswer${questionNumber}" name="[pictures][${questionNumber}][answer]" required type="text">
+    `
+  } else if (roundType === 'lightning') {
+    // new question form fields
+    htmlToInsert += `
+      <p>Question ${questionNumber}</p>
+      <label class="rounds__to-add__form__questions__question" for="lightningQuestion${questionNumber}">Question</label>
+      <input id="lightningQuestion${questionNumber}" name="[questions][${questionNumber}][lightningQuestion]" required type="text">
+      <label for="lightningAnswer${questionNumber}">Answer</label>
+      <input id="lightningAnswer${questionNumber}" name="[questions][${questionNumber}][lightningAnswer]" required type="text">
     `
   }
   document.querySelector('.rounds__to-add__form__questions').insertAdjacentHTML('beforeend', htmlToInsert)
