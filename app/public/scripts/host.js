@@ -22,6 +22,9 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('roundTypeMultiple').addEventListener('click', addRound)
   document.getElementById('roundTypePicture').addEventListener('click', addRound)
   document.getElementById('roundTypeLightning').addEventListener('click', addRound)
+
+  // check trivia status
+  checkTriviaStatus()
 }, false)
 
 // adding a new round
@@ -97,6 +100,7 @@ function addRound () {
     // update add a round form action
     document.querySelector('.rounds__to-add__form').action = `/host/${triviaData.triviaId}?addRound=lightning`
   }
+  document.querySelector('.rounds__to-add__form__add-question').click()
 }
 
 // adding additional questions to round
@@ -149,4 +153,19 @@ function addAdditionalQuestion (roundType) {
     `
   }
   document.querySelector('.rounds__to-add__form__questions').insertAdjacentHTML('beforeend', htmlToInsert)
+}
+
+// check if trivia is ready to be hosted
+function checkTriviaStatus () {
+  const hostTriviaButton = document.querySelector('.host-trivia-form__submit')
+  const hostTriviaHelp = document.querySelector('.host-trivia-form__submit-help')
+  if ('rounds' in triviaData && triviaData.rounds !== null) {
+    console.log('READY!')
+    hostTriviaButton.disabled = false
+    hostTriviaHelp.style.display = 'none'
+  } else {
+    console.log('NOT READY')
+    hostTriviaButton.disabled = true
+    hostTriviaHelp.style.display = 'block'
+  }
 }
