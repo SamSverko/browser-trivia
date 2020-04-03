@@ -140,7 +140,7 @@ function addAdditionalQuestion (roundType) {
     htmlToInsert = `
       <p>Picture ${questionNumber}</p>
       <label class="rounds__to-add__form__questions__question" for="pictureUrl${questionNumber}">URL</label>
-      <input id="pictureUrl${questionNumber}" name="[pictures][${questionNumber}][url]" required type="text">
+      <input id="pictureUrl${questionNumber}" name="[pictures][${questionNumber}][url]" onBlur="validateImageUrl(event)" required type="text">
       <label for="pictureAnswer${questionNumber}">Answer</label>
       <input id="pictureAnswer${questionNumber}" name="[pictures][${questionNumber}][answer]" required type="text">
     `
@@ -221,7 +221,9 @@ function displayExistingRounds () {
         `
       } else if (triviaData.rounds[i].type === 'picture') {
         htmlToInsert += `
-          <p>URL: ${triviaData.rounds[i][questionOrPicture][j].url}</p>
+          <a href="${triviaData.rounds[i][questionOrPicture][j].url}" target="_blank">
+            <img class="rounds__existing__round__image" rel="noopener noreferrer" src="${triviaData.rounds[i][questionOrPicture][j].url}" />
+          </a>
           <p>Answer: ${triviaData.rounds[i][questionOrPicture][j].answer}</p>
         `
       } else if (triviaData.rounds[i].type === 'lightning') {
@@ -237,4 +239,38 @@ function displayExistingRounds () {
     `
   }
   document.querySelector('.rounds__existing').insertAdjacentHTML('beforeend', htmlToInsert)
+}
+
+function validateImageUrl (event) {
+  if (event.target.value.length > 0) {
+    imageValidation(event.target.value, event.target)
+  }
+}
+
+function imageValidation (url, htmlElement, timeoutT) {
+  const inputLabel = htmlElement.previousElementSibling
+  return new Promise((resolve, reject) => {
+    var timeout = timeoutT || 5000
+    var timer
+    const img = new window.Image()
+    img.onerror = img.onabort = () => {
+      clearTimeout(timer)
+      // Promise.reject(new Error('Error loading image source.'))
+      console.log('bad img src')
+      inputLabel.innerHTML = 'URL <span class="color--red">(invalid image source)<span>'
+    }
+    img.onload = () => {
+      clearTimeout(timer)
+      resolve('success')
+      inputLabel.innerHTML = 'URL <span class="color--green">(valid)<span>'
+    }
+    timer = setTimeout(() => {
+      // reset .src to invalid URL so it stops previous
+      // loading, but doens't trigger new load
+      img.src = '//!!!!/noexist.jpg'
+      // Promise.reject(new Error('Timeout loading image source.'))
+      inputLabel.innerHTML = 'URL (invalid!)'
+    }, timeout)
+    img.src = url
+  })
 }

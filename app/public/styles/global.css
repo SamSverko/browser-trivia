@@ -16,4 +16,12 @@ h1, p {
   padding: 0;
 }
 
+.color--green {
+  color: green;
+}
+
+.color--red {
+  color: red;
+}
+
 /*# sourceMappingURL=global.css.map */

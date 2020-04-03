@@ -3,6 +3,10 @@
   border-radius: 5px;
   margin: 10px 0;
 }
+.rounds__existing .rounds__existing__round .rounds__existing__round__image {
+  height: 100px;
+  width: auto;
+}
 
 .rounds__select-type {
   background-color: grey;
