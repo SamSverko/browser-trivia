@@ -62,10 +62,16 @@ module.exports = {
     })
   },
   updateExistingTrivia: async (req, res, next) => {
-    const roundToInsert = {
-      type: req.body.type,
-      questions: req.body.questions
+    const roundToInsert = {}
+    roundToInsert.type = req.body.type
+    if (req.query.addRound === 'multipleChoice') {
+      roundToInsert.questions = req.body.questions
     }
+    if (req.query.addRound === 'picture') {
+      roundToInsert.theme = req.body.theme
+      roundToInsert.pictures = req.body.pictures
+    }
+
     req.app.db.collection(process.env.DB_COLLECTION_NAME).updateOne({ triviaId: req.params.triviaId },
       {
         $push: {

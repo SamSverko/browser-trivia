@@ -1,7 +1,7 @@
 .rounds__select-type {
   background-color: grey;
   color: black;
-  display: none;
+  display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: center;
@@ -34,11 +34,11 @@
   display: none;
   flex-direction: column;
 }
-.rounds__to-add .rounds__to-add__multiple-choice {
+.rounds__to-add .rounds__to-add__form {
   display: none;
   flex-direction: column;
 }
-.rounds__to-add .rounds__to-add__multiple-choice__add-question {
+.rounds__to-add .rounds__to-add__form__add-question {
   display: block;
 }
 

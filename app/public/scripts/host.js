@@ -2,14 +2,13 @@
 
 // executed on page load
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('Welcome to the host page!')
   console.log(triviaData)
 
   // update page title display
   document.getElementById('hostName').innerHTML = triviaData.host
   document.getElementById('hostTriviaId').innerHTML = triviaData.triviaId
 
-  // set form action
+  // set host trivia form action
   document.getElementById('hostForm').action = `/host/${triviaData.triviaId}`
 
   // update rounds display
@@ -18,7 +17,6 @@ document.addEventListener('DOMContentLoaded', () => {
   } else {
     console.log('You have no rounds')
   }
-  document.querySelector('.rounds__select-type').style.display = 'flex'
 
   // add event listeners to add a round buttons
   document.getElementById('roundTypeMultiple').addEventListener('click', addRound)
@@ -26,52 +24,99 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('roundTypeLightning').addEventListener('click', addRound)
 }, false)
 
+// when adding a new round
 function addRound () {
+  // hide add a round selection and display current round you are adding
   document.querySelector('.rounds__select-type').style.display = 'none'
   document.querySelector('.rounds__to-add').style.display = 'flex'
+  document.querySelector('.rounds__to-add__form').style.display = 'flex'
+
+  // save round title element
   const roundTitle = document.querySelector('.rounds__to-add__title')
+
+  // Round cancel button
+  document.querySelector('.rounds__to-add__form__cancel').addEventListener('click', (event) => {
+    event.preventDefault()
+    window.location.reload(false)
+  })
+
   if (this.id === 'roundTypeMultiple') {
+    // update round title
     roundTitle.innerHTML += 'Multiple Choice round'
-    document.querySelector('.rounds__to-add__multiple-choice').style.display = 'flex'
-    document.querySelector('.rounds__to-add__multiple-choice__add-question').addEventListener('click', (event) => {
+    // add additional question button
+    document.querySelector('.rounds__to-add__form__add-question').addEventListener('click', (event) => {
       event.preventDefault()
-      console.log('add a question!')
-      addMultipleChoiceQuestion()
+      addAdditionalQuestion('multipleChoice')
     })
-    document.querySelector('.rounds__to-add__multiple-choice').action = `/host/${triviaData.triviaId}?addRound=multipleChoice`
+    // update add a round form action
+    document.querySelector('.rounds__to-add__form').action = `/host/${triviaData.triviaId}?addRound=multipleChoice`
   } else if (this.id === 'roundTypePicture') {
+    // update round title
     roundTitle.innerHTML += 'Picture round'
+    // insert relevant add a round form data
+    const htmlToInsert = `
+      <input name="type" type="hidden" value="picture" />
+      <label for="pictureTheme">Picture theme</label>
+      <input id="pictureTheme" name="theme" required type="text">
+      <br />
+    `
+    document.querySelector('.rounds__to-add__form__questions').insertAdjacentHTML('beforeend', htmlToInsert)
+    // change from 'answer' to 'picture'
+    document.querySelector('.rounds__to-add__form__add-question').innerHTML = 'Add a picture'
+
+    document.querySelector('.rounds__to-add__form__add-question').addEventListener('click', (event) => {
+      event.preventDefault()
+      addAdditionalQuestion('picture')
+    })
+    // update add a round form action
+    document.querySelector('.rounds__to-add__form').action = `/host/${triviaData.triviaId}?addRound=picture`
   } else {
+    // update round title
     roundTitle.innerHTML += 'Lightning round'
   }
 }
 
-function addMultipleChoiceQuestion () {
-  const roundNumber = 0
-  const questionNumber = 1 + (document.getElementsByClassName('rounds__to-add__multiple-choice__questions__question').length)
-  let htmlToInsert = (questionNumber === 1) ? '<input name="type" type="hidden" value="multipleChoice" />' : ''
-  htmlToInsert += `
-    <label class="rounds__to-add__multiple-choice__questions__question" for="multipleQuestion${questionNumber}">Question ${questionNumber}</label>
-    <input id="multipleQuestion${questionNumber}" name="[questions][${questionNumber}][question]" required type="text">
-    <p>Possible answers for question ${questionNumber}</p>
-    <label for="question${questionNumber}ASelection">A</label>
-    <input id="question${questionNumber}ASelection" name="[questions][${questionNumber}][options]" required type="text">
-    <label for="question${questionNumber}BSelection">B</label>
-    <input id="question${questionNumber}ABelection" name="[questions][${questionNumber}][options]" required type="text">
-    <label for="rquestion${questionNumber}CSelection">C</label>
-    <input id="question${questionNumber}CSelection" name="[questions][${questionNumber}][options]" required type="text">
-    <label for="question${questionNumber}DSelection">D</label>
-    <input id="question${questionNumber}DSelection" name="[questions][${questionNumber}][options]" required type="text">
-    <p>Actual answer for question ${questionNumber}</p>
-    <input id="question${questionNumber}AAnswer" name="[questions][${questionNumber}][answer]" required type="radio" value="0">
-    <label for="question${questionNumber}AAnswer">A</label>
-    <input id="question${questionNumber}BAnswer" name="[questions][${questionNumber}][answer]" type="radio" value="1">
-    <label for="question${questionNumber}BAnswer">B</label>
-    <input id="question${questionNumber}CAnswer" name="[questions][${questionNumber}][answer]" type="radio" value="2">
-    <label for="question${questionNumber}CAnswer">C</label>
-    <input id="question${questionNumber}DAnswer" name="[questions][${questionNumber}][answer]" type="radio" value="3">
-    <label for="question${questionNumber}DAnswer">D</label>
-    <br />
-  `
-  document.querySelector('.rounds__to-add__multiple-choice__questions').insertAdjacentHTML('beforeend', htmlToInsert)
+// adding additional questions to round
+function addAdditionalQuestion (roundType) {
+  // save number of existing questions
+  const questionNumber = 1 + (document.getElementsByClassName('rounds__to-add__form__questions__question').length)
+  let htmlToInsert = ''
+  if (roundType === 'multipleChoice') {
+    // insert relevant add a round form data
+    htmlToInsert += (questionNumber === 1) ? '<input name="type" type="hidden" value="multipleChoice" />' : ''
+    // new question form fields
+    htmlToInsert += `
+      <label class="rounds__to-add__form__questions__question" for="multipleQuestion${questionNumber}">Question ${questionNumber}</label>
+      <input id="multipleQuestion${questionNumber}" name="[questions][${questionNumber}][question]" required type="text">
+      <p>Possible answers for question ${questionNumber}</p>
+      <label for="question${questionNumber}ASelection">A</label>
+      <input id="question${questionNumber}ASelection" name="[questions][${questionNumber}][options]" required type="text">
+      <label for="question${questionNumber}BSelection">B</label>
+      <input id="question${questionNumber}ABelection" name="[questions][${questionNumber}][options]" required type="text">
+      <label for="rquestion${questionNumber}CSelection">C</label>
+      <input id="question${questionNumber}CSelection" name="[questions][${questionNumber}][options]" required type="text">
+      <label for="question${questionNumber}DSelection">D</label>
+      <input id="question${questionNumber}DSelection" name="[questions][${questionNumber}][options]" required type="text">
+      <p>Actual answer for question ${questionNumber}</p>
+      <input id="question${questionNumber}AAnswer" name="[questions][${questionNumber}][answer]" required type="radio" value="0">
+      <label for="question${questionNumber}AAnswer">A</label>
+      <input id="question${questionNumber}BAnswer" name="[questions][${questionNumber}][answer]" type="radio" value="1">
+      <label for="question${questionNumber}BAnswer">B</label>
+      <input id="question${questionNumber}CAnswer" name="[questions][${questionNumber}][answer]" type="radio" value="2">
+      <label for="question${questionNumber}CAnswer">C</label>
+      <input id="question${questionNumber}DAnswer" name="[questions][${questionNumber}][answer]" type="radio" value="3">
+      <label for="question${questionNumber}DAnswer">D</label>
+      <br />
+    `
+  } else if (roundType === 'picture') {
+    // new question form fields
+    htmlToInsert = `
+      <p>Picture ${questionNumber}</p>
+      <label class="rounds__to-add__form__questions__question" for="pictureUrl${questionNumber}">URL</label>
+      <input id="pictureUrl${questionNumber}" name="[pictures][${questionNumber}][url]" required type="text">
+      <label for="pictureAnswer${questionNumber}">Answer</label>
+      <input id="pictureAnswer${questionNumber}" name="[pictures][${questionNumber}][answer]" required type="text">
+    `
+  }
+  document.querySelector('.rounds__to-add__form__questions').insertAdjacentHTML('beforeend', htmlToInsert)
 }

@@ -60,9 +60,14 @@ router.post('/host', [
 })
 
 router.post('/host/:triviaId', [
-  body('type').isString().trim().escape(),
-  body('questions').isArray().notEmpty(),
-  body('questions.*.answer').toInt()
+  body('type').isString().isIn(['multipleChoice', 'picture', 'lightning']),
+  body('questions').isArray().notEmpty().optional(),
+  body('questions.*.question').isString().notEmpty().trim().escape(),
+  body('questions.*.options.*').isString().notEmpty().trim().escape(),
+  body('questions.*.answer').toInt().isIn([0, 1, 2, 3]),
+  body('theme').isString().notEmpty().trim().escape().optional(),
+  body('pictures.*.url').isString().notEmpty().trim().escape().optional(),
+  body('pictures.*.answer').isString().notEmpty().trim().escape().optional()
 ], (req, res, next) => {
   console.log(`${req.method} request for ${req.url}.`)
 
@@ -75,8 +80,10 @@ router.post('/host/:triviaId', [
     return next(error)
   }
 
-  if (req.query.addRound === 'multipleChoice') {
+  if (req.query.addRound === 'multipleChoice' || req.query.addRound === 'picture') {
     DbController.updateExistingTrivia(req, res, next)
+  } else {
+    res.send('nurfin')
   }
 })
 
