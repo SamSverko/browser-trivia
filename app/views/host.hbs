@@ -8,6 +8,8 @@
 <div class="rounds">
   <h2>Rounds</h2>
 
+  <div class="rounds__existing"></div>
+
   <div class="rounds__select-type">
     <p class="rounds__select-type__title">Add a round</p>
     <div id="roundTypeMultiple">
@@ -33,16 +35,35 @@
     <input class="rounds__to-add__form__save" type="submit" value="Save Round">
     </form>
   </div>
+
+  <h2>Tie breaker</h2>
+  
+  <div class="tie-breaker__add">
+    <p>Question must be number-based (e.g. Q: How tall is the CN tower in metres? A: 553)</p>
+    <form class="tie-breaker__add__form" method="POST">
+      <label for="tieBreakerQuestion">Question</label>
+      <input id="tieBreakerQuestion" name="tieBreaker[question]" required type="text">
+      <label for="tieBreakerAnswer">Answer</label>
+      <input id="tieBreakerAnswer" name="tieBreaker[answer]" required type="number">
+      <input class="tie-breaker__add__form__submit" type="submit" value="Save Tie Breaker">
+    </form>
+  </div>
+
+  <div class="tie-breaker">
+    <p class="tie-breaker__question"></p>
+    <p class="tie-breaker__answer"></p>
+  </div>
 </div>
 
 <hr />
 
-<form id="hostForm" method="POST">
-
-  <input id="form-host-submit" name="host-submit" type="submit" value="Host trivia!">
-  <p>Steps needed to enable the "Host trivia!" button:</p>
-  <ol>
-    <li>Add at least 1 round.</li>
-    <li>Add a tie breaker question.</li>
-  </ol>
+<form class="host-trivia-form" id="hostForm" method="POST">
+  <input class="host-trivia-form__submit" id="form-host-submit" name="host-submit" type="submit" value="Host trivia!">
+  <div class="host-trivia-form__submit-help">
+    <p>Steps needed to enable the "Host trivia!" button:</p>
+    <ol>
+      <li id="submitHelp1Round">Add at least 1 round.</li>
+      <li id="submitHelpTieBreaker">Add a tie breaker question.</li>
+    </ol>
+  </div>
 </form>

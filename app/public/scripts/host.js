@@ -2,13 +2,14 @@
 
 // on page load
 document.addEventListener('DOMContentLoaded', () => {
-  // console.log(triviaData)
+  console.log(triviaData)
 
   // update page title display
   document.getElementById('hostName').innerHTML = triviaData.host
   document.getElementById('hostTriviaId').innerHTML = triviaData.triviaId
 
-  // set host trivia form action
+  // set host trivia form actions
+  document.querySelector('.tie-breaker__add__form').action = `/host/${triviaData.triviaId}?addRound=tieBreaker`
   document.getElementById('hostForm').action = `/host/${triviaData.triviaId}`
 
   // update rounds display
@@ -20,6 +21,9 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('roundTypeMultiple').addEventListener('click', addRound)
   document.getElementById('roundTypePicture').addEventListener('click', addRound)
   document.getElementById('roundTypeLightning').addEventListener('click', addRound)
+
+  // toggle tie breaker display
+  checkTieBreakerStatus()
 
   // check trivia status
   checkTriviaStatus()
@@ -153,18 +157,38 @@ function addAdditionalQuestion (roundType) {
   document.querySelector('.rounds__to-add__form__questions').insertAdjacentHTML('beforeend', htmlToInsert)
 }
 
+// display/hide saved tie breaker
+function checkTieBreakerStatus () {
+  const addTieBreakerContainer = document.querySelector('.tie-breaker__add')
+  const tieBreakerContainer = document.querySelector('.tie-breaker')
+  if (triviaData.tieBreaker && triviaData.tieBreaker !== null) {
+    addTieBreakerContainer.style.display = 'none'
+    tieBreakerContainer.style.display = 'block'
+    document.querySelector('.tie-breaker__question').innerHTML = `Question: ${triviaData.tieBreaker.question}`
+    document.querySelector('.tie-breaker__answer').innerHTML = `Answer: ${triviaData.tieBreaker.answer}`
+  } else {
+    addTieBreakerContainer.style.display = 'block'
+    tieBreakerContainer.style.display = 'none'
+  }
+}
+
 // check if trivia is ready to be hosted
 function checkTriviaStatus () {
+  // initialize as showing all items
   const hostTriviaButton = document.querySelector('.host-trivia-form__submit')
-  const hostTriviaHelp = document.querySelector('.host-trivia-form__submit-help')
+  const helpContainer = document.querySelector('.host-trivia-form__submit-help')
+  const help1Round = document.getElementById('submitHelp1Round')
+  const helpTieBreaker = document.getElementById('submitHelpTieBreaker')
+  hostTriviaButton.disabled = true
+  helpContainer.style.display = 'block'
   // hide form host submit if rounds exist, display if no rounds exist
   if ('rounds' in triviaData && triviaData.rounds !== null) {
-    hostTriviaButton.disabled = false
-    hostTriviaHelp.style.display = 'none'
-  } else {
-    hostTriviaButton.disabled = true
-    hostTriviaHelp.style.display = 'block'
+    help1Round.style.display = (triviaData.rounds.length > 0) ? 'none' : 'block'
   }
+  helpTieBreaker.style.display = (triviaData.tieBreaker) ? 'none' : 'block'
+
+  helpContainer.style.display = (help1Round.style.display === 'none' && helpTieBreaker.style.display === 'none') ? 'none' : 'block'
+  hostTriviaButton.disabled = (helpContainer.style.display !== 'none')
 }
 
 // display saved rounds
@@ -176,7 +200,7 @@ function displayExistingRounds () {
     const numberOfQuestions = (triviaData.rounds[i].type === 'picture') ? triviaData.rounds[i].pictures.length : triviaData.rounds[i].questions.length
     htmlToInsert += `
       <div class="rounds__existing__round">
-        <p>Round ${i+1}</p>
+        <p>Round ${i + 1}</p>
         <p>Type: ${roundType}</p>
         <p>Number of ${questionOrPicture}: ${numberOfQuestions}</p>
         <details>

@@ -78,21 +78,42 @@ module.exports = {
         })
       }
       roundToInsert.questions = fixedQuestionKeys
+    } else if (req.query.addRound === 'tieBreaker') {
+      const tieBreakerToInsert = {
+        question: req.body.tieBreaker.question,
+        answer: req.body.tieBreaker.answer
+      }
+      req.app.db.collection(process.env.DB_COLLECTION_NAME).updateOne({ triviaId: req.params.triviaId },
+        {
+          $set: {
+            tieBreaker: tieBreakerToInsert
+          }
+        }, (error, result) => {
+          if (error) {
+            const error = new Error()
+            error.statusCode = 400
+            error.message = error
+            next(error)
+          }
+          res.redirect(`/host/${req.params.triviaId}`)
+        })
     }
 
-    req.app.db.collection(process.env.DB_COLLECTION_NAME).updateOne({ triviaId: req.params.triviaId },
-      {
-        $push: {
-          rounds: roundToInsert
-        }
-      }, (error, result) => {
-        if (error) {
-          const error = new Error()
-          error.statusCode = 400
-          error.message = error
-          next(error)
-        }
-        res.redirect(`/host/${req.params.triviaId}`)
-      })
+    if (req.query.addRound !== 'tieBreaker') {
+      req.app.db.collection(process.env.DB_COLLECTION_NAME).updateOne({ triviaId: req.params.triviaId },
+        {
+          $push: {
+            rounds: roundToInsert
+          }
+        }, (error, result) => {
+          if (error) {
+            const error = new Error()
+            error.statusCode = 400
+            error.message = error
+            next(error)
+          }
+          res.redirect(`/host/${req.params.triviaId}`)
+        })
+    }
   }
 }

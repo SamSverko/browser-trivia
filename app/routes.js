@@ -60,8 +60,8 @@ router.post('/host', [
 })
 
 router.post('/host/:triviaId', [
-  body('type').isString().isIn(['multipleChoice', 'picture', 'lightning']),
-  body('theme').isString().trim().escape(),
+  body('type').isString().isIn(['multipleChoice', 'picture', 'lightning']).optional(),
+  body('theme').isString().trim().escape().optional(),
   body('questions').isArray().notEmpty().optional(),
   body('questions.*.question').isString().notEmpty().trim().escape().optional(),
   body('questions.*.options.*').isString().notEmpty().trim().escape().optional(),
@@ -69,7 +69,9 @@ router.post('/host/:triviaId', [
   body('pictures.*.url').isString().notEmpty().trim().escape().optional(),
   body('pictures.*.answer').isString().notEmpty().trim().escape().optional(),
   body('questions.*.lightningQuestion').isString().notEmpty().trim().escape().optional(),
-  body('questions.*.lightningAnswer').isString().notEmpty().trim().escape().optional()
+  body('questions.*.lightningAnswer').isString().notEmpty().trim().escape().optional(),
+  body('tieBreaker.question').isString().notEmpty().trim().escape().optional(),
+  body('tieBreaker.answer').trim().escape().toInt().notEmpty().optional()
 ], (req, res, next) => {
   console.log(`${req.method} request for ${req.url}.`)
 
@@ -82,7 +84,7 @@ router.post('/host/:triviaId', [
     return next(error)
   }
 
-  if (req.query.addRound === 'multipleChoice' || req.query.addRound === 'picture' || req.query.addRound === 'lightning') {
+  if (req.query.addRound === 'multipleChoice' || req.query.addRound === 'picture' || req.query.addRound === 'lightning' || req.query.addRound === 'tieBreaker') {
     DbController.updateExistingTrivia(req, res, next)
   } else {
     res.send('unknown round type.')
