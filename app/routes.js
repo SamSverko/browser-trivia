@@ -60,9 +60,9 @@ router.post('/host', [
 })
 
 router.post('/host/:triviaId', [
-  body('rounds.*.type').isString().trim().escape(),
-  body('rounds.*.questions').isArray().notEmpty(),
-  body('rounds.*.questions.*.answer').toInt()
+  body('type').isString().trim().escape(),
+  body('questions').isArray().notEmpty(),
+  body('questions.*.answer').toInt()
 ], (req, res, next) => {
   console.log(`${req.method} request for ${req.url}.`)
 
@@ -75,7 +75,9 @@ router.post('/host/:triviaId', [
     return next(error)
   }
 
-  DbController.updateExistingTrivia(req, res, next)
+  if (req.query.addRound === 'multipleChoice') {
+    DbController.updateExistingTrivia(req, res, next)
+  }
 })
 
 // server error handler test page

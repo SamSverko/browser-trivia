@@ -62,11 +62,14 @@ module.exports = {
     })
   },
   updateExistingTrivia: async (req, res, next) => {
-    console.log(req.body.rounds)
+    const roundToInsert = {
+      type: req.body.type,
+      questions: req.body.questions
+    }
     req.app.db.collection(process.env.DB_COLLECTION_NAME).updateOne({ triviaId: req.params.triviaId },
       {
-        $set: {
-          rounds: req.body.rounds
+        $push: {
+          rounds: roundToInsert
         }
       }, (error, result) => {
         if (error) {
@@ -75,7 +78,7 @@ module.exports = {
           error.message = error
           next(error)
         }
-        res.send(result)
+        res.redirect(`/host/${req.params.triviaId}`)
       })
   }
 }

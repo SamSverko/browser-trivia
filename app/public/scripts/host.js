@@ -13,12 +13,12 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('hostForm').action = `/host/${triviaData.triviaId}`
 
   // update rounds display
-  if ('rounds' in triviaData) {
+  if ('rounds' in triviaData && triviaData.rounds !== null) {
     console.log('You have at least one round')
   } else {
     console.log('You have no rounds')
-    document.querySelector('.rounds__select-type').style.display = 'flex'
   }
+  document.querySelector('.rounds__select-type').style.display = 'flex'
 
   // add event listeners to add a round buttons
   document.getElementById('roundTypeMultiple').addEventListener('click', addRound)
@@ -49,28 +49,28 @@ function addRound () {
 function addMultipleChoiceQuestion () {
   const roundNumber = 0
   const questionNumber = 1 + (document.getElementsByClassName('rounds__to-add__multiple-choice__questions__question').length)
-  let htmlToInsert = (questionNumber === 1) ? `<input name="rounds[${roundNumber}][type]" type="hidden" value="multipleChoice" />` : ''
+  let htmlToInsert = (questionNumber === 1) ? '<input name="type" type="hidden" value="multipleChoice" />' : ''
   htmlToInsert += `
-    <label class="rounds__to-add__multiple-choice__questions__question" for="round${roundNumber}Question${questionNumber}Question">Question ${questionNumber}</label>
-    <input id="multiple${questionNumber}Question" name="rounds[${roundNumber}][questions][${questionNumber}][question]" required type="text">
+    <label class="rounds__to-add__multiple-choice__questions__question" for="multipleQuestion${questionNumber}">Question ${questionNumber}</label>
+    <input id="multipleQuestion${questionNumber}" name="[questions][${questionNumber}][question]" required type="text">
     <p>Possible answers for question ${questionNumber}</p>
-    <label for="round${roundNumber}Question${questionNumber}ASelection">A</label>
-    <input id="round${roundNumber}Question${questionNumber}ASelection" name="rounds[${roundNumber}][questions][${questionNumber}][options]" required type="text">
-    <label for="round${roundNumber}Question${questionNumber}BSelection">B</label>
-    <input id="round${roundNumber}Question${questionNumber}ABelection" name="rounds[${roundNumber}][questions][${questionNumber}][options]" required type="text">
-    <label for="round${roundNumber}Question${questionNumber}CSelection">C</label>
-    <input id="round${roundNumber}Question${questionNumber}CSelection" name="rounds[${roundNumber}][questions][${questionNumber}][options]" required type="text">
-    <label for="round${roundNumber}Question${questionNumber}DSelection">D</label>
-    <input id="round${roundNumber}Question${questionNumber}DSelection" name="rounds[${roundNumber}][questions][${questionNumber}][options]" required type="text">
+    <label for="question${questionNumber}ASelection">A</label>
+    <input id="question${questionNumber}ASelection" name="[questions][${questionNumber}][options]" required type="text">
+    <label for="question${questionNumber}BSelection">B</label>
+    <input id="question${questionNumber}ABelection" name="[questions][${questionNumber}][options]" required type="text">
+    <label for="rquestion${questionNumber}CSelection">C</label>
+    <input id="question${questionNumber}CSelection" name="[questions][${questionNumber}][options]" required type="text">
+    <label for="question${questionNumber}DSelection">D</label>
+    <input id="question${questionNumber}DSelection" name="[questions][${questionNumber}][options]" required type="text">
     <p>Actual answer for question ${questionNumber}</p>
-    <input id="round${roundNumber}Question${questionNumber}AAnswer" name="rounds[${roundNumber}][questions][${questionNumber}][answer]" required type="radio" value="0">
-    <label for="round${roundNumber}Question${questionNumber}AAnswer">A</label>
-    <input id="round${roundNumber}Question${questionNumber}BAnswer" name="rounds[${roundNumber}][questions][${questionNumber}][answer]" type="radio" value="1">
-    <label for="round${roundNumber}Question${questionNumber}BAnswer">B</label>
-    <input id="round${roundNumber}Question${questionNumber}CAnswer" name="rounds[${roundNumber}][questions][${questionNumber}][answer]" type="radio" value="2">
-    <label for="round${roundNumber}Question${questionNumber}CAnswer">C</label>
-    <input id="round${roundNumber}Question${questionNumber}DAnswer" name="rounds[${roundNumber}][questions][${questionNumber}][answer]" type="radio" value="3">
-    <label for="round${roundNumber}Question${questionNumber}DAnswer">D</label>
+    <input id="question${questionNumber}AAnswer" name="[questions][${questionNumber}][answer]" required type="radio" value="0">
+    <label for="question${questionNumber}AAnswer">A</label>
+    <input id="question${questionNumber}BAnswer" name="[questions][${questionNumber}][answer]" type="radio" value="1">
+    <label for="question${questionNumber}BAnswer">B</label>
+    <input id="question${questionNumber}CAnswer" name="[questions][${questionNumber}][answer]" type="radio" value="2">
+    <label for="question${questionNumber}CAnswer">C</label>
+    <input id="question${questionNumber}DAnswer" name="[questions][${questionNumber}][answer]" type="radio" value="3">
+    <label for="question${questionNumber}DAnswer">D</label>
     <br />
   `
   document.querySelector('.rounds__to-add__multiple-choice__questions').insertAdjacentHTML('beforeend', htmlToInsert)
