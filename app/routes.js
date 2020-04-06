@@ -29,6 +29,24 @@ router.get('/', (req, res) => {
   })
 })
 
+router.post('/join', [
+  body('player-name').isString().notEmpty().trim().escape(),
+  body('player-code').isString().notEmpty().trim().escape().isLength(4)
+], (req, res, next) => {
+  console.log(`${req.method} request for ${req.url}.`)
+
+  // return any errors
+  const validationErrors = validationResult(req)
+  if (!validationErrors.isEmpty()) {
+    const error = new Error()
+    error.statusCode = 422
+    error.message = `Form validation failed:<br /><pre><code>${JSON.stringify(validationErrors.array(), undefined, 2)}</code></pre>`
+    return next(error)
+  }
+
+  DbController.joinTrivia(req, res, next)
+})
+
 router.get('/host', (req, res) => {
   console.log(`${req.method} request for ${req.url}.`)
 

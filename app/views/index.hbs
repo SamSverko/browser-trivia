@@ -9,12 +9,12 @@
 
 <hr />
 
-<form action={{currentPage}} method="post">
+<form action="/join" method="post">
   <label for="form-player-name">Name</label>
   <input id="form-player-title" name="player-name" required type="text">
   <br />
   <label for="form-player-code">Room code</label>
-  <input id="form-player-code" name="player-code" required type="text">
+  <input id="form-player-code" name="player-code" pattern="[A-Za-z]{4}" required title="Must be exactly 4 characters." type="text">
   <br />
   <input id="form-player-submit" name="player-submit" type="submit" value="Join">
 </form>

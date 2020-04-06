@@ -2,6 +2,28 @@
 require('dotenv').config()
 
 module.exports = {
+  findTrivia: async (req, res, next) => {
+    req.app.db.collection(process.env.DB_COLLECTION_NAME).find({ triviaId: req.params.triviaId }).toArray((error, result) => {
+      if (error) {
+        const error = new Error()
+        error.statusCode = 400
+        error.message = error
+        next(error)
+      } else if (result.length !== 1) {
+        const error = new Error()
+        error.statusCode = 400
+        error.message = 'Trivia not found, please try a different room code.'
+        next(error)
+      } else {
+        res.render('host', {
+          title: 'Host (TEST)',
+          triviaData: JSON.stringify(result[0]),
+          scripts: [{ file: 'host' }],
+          styles: [{ file: 'host' }]
+        })
+      }
+    })
+  },
   insertNewTrivia: async (req, res, next) => {
     // retrieve all existing triviaIds
     req.app.db.collection(process.env.DB_COLLECTION_NAME).find({}).project({ _id: 0, triviaId: 1 }).toArray((error, result) => {
@@ -45,8 +67,11 @@ module.exports = {
       }
     })
   },
-  findTrivia: async (req, res, next) => {
-    req.app.db.collection(process.env.DB_COLLECTION_NAME).find({ triviaId: req.params.triviaId }).toArray((error, result) => {
+  joinTrivia: async (req, res, next) => {
+    const triviaToJoin = req.body['player-code']
+    const playerName = req.body['player-name']
+    console.log(playerName)
+    req.app.db.collection(process.env.DB_COLLECTION_NAME).find({ triviaId: triviaToJoin }).toArray((error, result) => {
       if (error) {
         const error = new Error()
         error.statusCode = 400
@@ -58,11 +83,12 @@ module.exports = {
         error.message = 'Trivia not found, please try a different room code.'
         next(error)
       } else {
-        res.render('host', {
-          title: 'Host (TEST)',
+        res.render('lobby', {
+          title: 'Lobby',
           triviaData: JSON.stringify(result[0]),
-          scripts: [{ file: 'host' }],
-          styles: [{ file: 'host' }]
+          playerName: playerName,
+          scripts: [{ file: 'lobby' }],
+          styles: [{ file: 'lobby' }]
         })
       }
     })
