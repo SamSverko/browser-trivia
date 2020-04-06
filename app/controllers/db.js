@@ -10,38 +10,39 @@ module.exports = {
         error.statusCode = 400
         error.message = error
         next(error)
-      }
-      // push result array of objects into array of triviaIds
-      const existingTriviaIds = []
-      result.forEach((item) => {
-        existingTriviaIds.push(item.triviaId)
-      })
-      // generate a triviaId that does not match any already-existing triviaIds
-      let currentTriviaId = ''
-      const characters = 'abcdefghijklmnopqrstuvwxyz'
-      const charactersLength = characters.length
-      do {
-        currentTriviaId = ''
-        for (let i = 0; i < 4; i++) {
-          currentTriviaId += characters.charAt(Math.floor(Math.random() * charactersLength))
+      } else {
+        // push result array of objects into array of triviaIds
+        const existingTriviaIds = []
+        result.forEach((item) => {
+          existingTriviaIds.push(item.triviaId)
+        })
+        // generate a triviaId that does not match any already-existing triviaIds
+        let currentTriviaId = ''
+        const characters = 'abcdefghijklmnopqrstuvwxyz'
+        const charactersLength = characters.length
+        do {
+          currentTriviaId = ''
+          for (let i = 0; i < 4; i++) {
+            currentTriviaId += characters.charAt(Math.floor(Math.random() * charactersLength))
+          }
+        } while (existingTriviaIds.includes(currentTriviaId))
+        // insert new trivia into database
+        const documentToInsert = {
+          createdAt: new Date().toISOString(),
+          triviaId: currentTriviaId,
+          host: req.body['host-index-name']
         }
-      } while (existingTriviaIds.includes(currentTriviaId))
-      // insert new trivia into database
-      const documentToInsert = {
-        createdAt: new Date().toISOString(),
-        triviaId: currentTriviaId,
-        host: req.body['host-index-name']
+        req.app.db.collection(process.env.DB_COLLECTION_NAME).insertOne(documentToInsert, (error, result) => {
+          if (error) {
+            const error = new Error()
+            error.statusCode = 400
+            error.message = error
+            next(error)
+          } else {
+            res.redirect(`/host/${result.ops[0].triviaId}`)
+          }
+        })
       }
-      req.app.db.collection(process.env.DB_COLLECTION_NAME).insertOne(documentToInsert, (error, result) => {
-        if (error) {
-          const error = new Error()
-          error.statusCode = 400
-          error.message = error
-          next(error)
-        }
-        // redirect to host home page
-        res.redirect(`/host/${result.ops[0].triviaId}`)
-      })
     })
   },
   findTrivia: async (req, res, next) => {
@@ -51,14 +52,19 @@ module.exports = {
         error.statusCode = 400
         error.message = error
         next(error)
+      } else if (result.length !== 1) {
+        const error = new Error()
+        error.statusCode = 400
+        error.message = 'Trivia not found, please try a different room code.'
+        next(error)
+      } else {
+        res.render('host', {
+          title: 'Host (TEST)',
+          triviaData: JSON.stringify(result[0]),
+          scripts: [{ file: 'host' }],
+          styles: [{ file: 'host' }]
+        })
       }
-
-      res.render('host', {
-        title: 'Host (TEST)',
-        triviaData: JSON.stringify(result[0]),
-        scripts: [{ file: 'host' }],
-        styles: [{ file: 'host' }]
-      })
     })
   },
   updateExistingTrivia: async (req, res, next) => {
@@ -94,8 +100,9 @@ module.exports = {
             error.statusCode = 400
             error.message = error
             next(error)
+          } else {
+            res.redirect(`/host/${req.params.triviaId}`)
           }
-          res.redirect(`/host/${req.params.triviaId}`)
         })
     }
 
@@ -111,8 +118,9 @@ module.exports = {
             error.statusCode = 400
             error.message = error
             next(error)
+          } else {
+            res.redirect(`/host/${req.params.triviaId}`)
           }
-          res.redirect(`/host/${req.params.triviaId}`)
         })
     }
   }
