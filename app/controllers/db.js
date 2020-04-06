@@ -103,6 +103,7 @@ module.exports = {
     const roundToInsert = {}
     roundToInsert.type = req.body.type
     roundToInsert.theme = (req.body.theme !== '') ? req.body.theme : 'none'
+    roundToInsert.pointValue = (Number.isInteger(req.body.pointValue)) ? req.body.pointValue : 1
     if (req.query.addRound === 'multipleChoice') {
       roundToInsert.questions = req.body.questions
     } else if (req.query.addRound === 'picture') {

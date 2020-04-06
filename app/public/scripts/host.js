@@ -60,10 +60,14 @@ function addRound () {
     roundTitle.innerHTML += 'Multiple Choice round'
     // insert relevant add a round form data
     const htmlToInsert = `
-      <input name="type" type="hidden" value="multipleChoice" />
-      <label for="multipleTheme">Theme (can leave blank if none)</label>
-      <input id="multipleTheme" name="theme" type="text">
-      <br />
+      <div>
+        <input name="type" type="hidden" value="multipleChoice" />
+        <label for="multipleTheme">Theme (can leave blank if none)</label>
+        <input id="multipleTheme" name="theme" type="text">
+        <br />
+        <label for="multiplePointValue">Question point value (1 if left blank)</label>
+        <input id="multiplePointValue" name="pointValue" type="number">
+      </div>
     `
     document.querySelector('.rounds__to-add__form__questions').insertAdjacentHTML('beforeend', htmlToInsert)
     // add additional question button
@@ -78,10 +82,14 @@ function addRound () {
     roundTitle.innerHTML += 'Picture round'
     // insert relevant add a round form data
     const htmlToInsert = `
-      <input name="type" type="hidden" value="picture" />
-      <label for="pictureTheme">Theme (can leave blank if none)</label>
-      <input id="pictureTheme" name="theme" type="text">
-      <br />
+      <div>
+        <input name="type" type="hidden" value="picture" />
+        <label for="pictureTheme">Theme (can leave blank if none)</label>
+        <input id="pictureTheme" name="theme" type="text">
+        <br />
+        <label for="picturePointValue">Picture point value (1 if left blank)</label>
+        <input id="picturePointValue" name="pointValue" type="number">
+      <div>
     `
     document.querySelector('.rounds__to-add__form__questions').insertAdjacentHTML('beforeend', htmlToInsert)
     // change from 'answer' to 'picture'
@@ -98,10 +106,14 @@ function addRound () {
     roundTitle.innerHTML += 'Lightning round'
     // insert relevant add a round form data
     const htmlToInsert = `
-      <input name="type" type="hidden" value="lightning" />
-      <label for="lightningTheme">Theme (can leave blank if none)</label>
-      <input id="lightningTheme" name="theme" type="text">
-      <br />
+      <div>
+        <input name="type" type="hidden" value="lightning" />
+        <label for="lightningTheme">Theme (can leave blank if none)</label>
+        <input id="lightningTheme" name="theme" type="text">
+        <br />
+        <label for="lightningPointValue">Question point value (1 if left blank)</label>
+        <input id="lightningPointValue" name="pointValue" type="number">
+      </div>
     `
     document.querySelector('.rounds__to-add__form__questions').insertAdjacentHTML('beforeend', htmlToInsert)
     // add additional question button
@@ -226,9 +238,9 @@ function checkTriviaStatus () {
   helpContainer.style.display = 'block'
   // hide form host submit if rounds exist, display if no rounds exist
   if ('rounds' in triviaData && triviaData.rounds !== null) {
-    help1Round.style.display = (triviaData.rounds.length > 0) ? 'none' : 'block'
+    help1Round.style.display = (triviaData.rounds.length > 0) ? 'none' : 'list-item'
   }
-  helpTieBreaker.style.display = (triviaData.tieBreaker) ? 'none' : 'block'
+  helpTieBreaker.style.display = (triviaData.tieBreaker) ? 'none' : 'list-item'
 
   helpContainer.style.display = (help1Round.style.display === 'none' && helpTieBreaker.style.display === 'none') ? 'none' : 'block'
   hostTriviaButton.disabled = (helpContainer.style.display !== 'none')
@@ -246,6 +258,7 @@ function displayExistingRounds () {
         <p>Round ${i + 1}</p>
         <button class="rounds__existing__round__cancel" id="round${i}Cancel">Remove round</button>
         <p>Type: ${roundType}</p>
+        <p>Point value: ${triviaData.rounds[i].pointValue}</p>
         <p>Number of ${questionOrPicture}: ${numberOfQuestions}</p>
         <details>
           <summary>${questionOrPicture}</summary>

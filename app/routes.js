@@ -68,6 +68,7 @@ router.get('/host/:triviaId', (req, res, next) => {
 router.post('/host/:triviaId', [
   body('type').isString().isIn(['multipleChoice', 'picture', 'lightning']).optional(),
   body('theme').isString().trim().escape().optional(),
+  body('pointValue').toInt().optional(),
   body('questions').isArray().notEmpty().optional(),
   body('questions.*.question').isString().notEmpty().trim().escape().optional(),
   body('questions.*.options.*').isString().notEmpty().trim().escape().optional(),
