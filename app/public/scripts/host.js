@@ -242,8 +242,9 @@ function displayExistingRounds () {
     const questionOrPicture = (triviaData.rounds[i].type === 'picture') ? 'pictures' : 'questions'
     const numberOfQuestions = (triviaData.rounds[i].type === 'picture') ? triviaData.rounds[i].pictures.length : triviaData.rounds[i].questions.length
     htmlToInsert += `
-      <div class="rounds__existing__round">
+      <div class="rounds__existing__round" id="round${i}">
         <p>Round ${i + 1}</p>
+        <button class="rounds__existing__round__cancel" id="round${i}Cancel">Remove round</button>
         <p>Type: ${roundType}</p>
         <p>Number of ${questionOrPicture}: ${numberOfQuestions}</p>
         <details>
@@ -282,6 +283,12 @@ function displayExistingRounds () {
     `
   }
   document.querySelector('.rounds__existing').insertAdjacentHTML('beforeend', htmlToInsert)
+  // cancel buttons
+  const cancelButtons = document.querySelectorAll('.rounds__existing__round__cancel')
+  cancelButtons.forEach((button) => {
+    button.removeEventListener('click', removeRound)
+    button.addEventListener('click', removeRound)
+  })
 }
 
 function validateImageUrl (event) {
@@ -318,4 +325,11 @@ function imageValidation (url, htmlElement, timeoutT) {
     }, timeout)
     img.src = url
   })
+}
+
+function removeRound (event) {
+  event.preventDefault()
+  const idOfElementToRemove = event.target.id.replace('Cancel', '')
+  const roundToRemove = idOfElementToRemove.replace('round', '')
+  window.location.replace(`/host/${triviaData.triviaId}?removeRound=${roundToRemove}`)
 }

@@ -29,12 +29,6 @@ router.get('/', (req, res) => {
   })
 })
 
-router.get('/host/:triviaId', (req, res, next) => {
-  console.log(`${req.method} request for ${req.url}.`)
-
-  DbController.findTrivia(req, res, next)
-})
-
 router.get('/host', (req, res) => {
   console.log(`${req.method} request for ${req.url}.`)
 
@@ -57,6 +51,18 @@ router.post('/host', [
   }
 
   DbController.insertNewTrivia(req, res, next)
+})
+
+router.get('/host/:triviaId', (req, res, next) => {
+  console.log(`${req.method} request for ${req.url}.`)
+
+  if (req.query.removeRound) {
+    console.log('remove round')
+    DbController.removeRound(req, res, next)
+  } else {
+    console.log('regular get')
+    DbController.findTrivia(req, res, next)
+  }
 })
 
 router.post('/host/:triviaId', [

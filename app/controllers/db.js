@@ -67,6 +67,38 @@ module.exports = {
       }
     })
   },
+  removeRound: async (req, res, next) => {
+    const roundToRemove = `rounds.${req.query.removeRound}`
+    req.app.db.collection(process.env.DB_COLLECTION_NAME).updateOne({ triviaId: req.params.triviaId },
+      {
+        $unset: {
+          [roundToRemove]: 1
+        }
+      }, (error, result) => {
+        if (error) {
+          const error = new Error()
+          error.statusCode = 400
+          error.message = error
+          next(error)
+        } else {
+          req.app.db.collection(process.env.DB_COLLECTION_NAME).updateOne({ triviaId: req.params.triviaId },
+            {
+              $pull: {
+                rounds: null
+              }
+            }, (error, result) => {
+              if (error) {
+                const error = new Error()
+                error.statusCode = 400
+                error.message = error
+                next(error)
+              } else {
+                res.redirect(`/host/${req.params.triviaId}`)
+              }
+            })
+        }
+      })
+  },
   updateExistingTrivia: async (req, res, next) => {
     const roundToInsert = {}
     roundToInsert.type = req.body.type
