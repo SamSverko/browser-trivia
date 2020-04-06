@@ -123,48 +123,81 @@ function addAdditionalQuestion (roundType) {
   if (roundType === 'multipleChoice') {
     // new question form fields
     htmlToInsert += `
-      <label class="rounds__to-add__form__questions__question" for="multipleQuestion${questionNumber}">Question ${questionNumber}</label>
-      <input id="multipleQuestion${questionNumber}" name="[questions][${questionNumber}][question]" required type="text">
-      <p>Possible answers for question ${questionNumber}</p>
-      <label for="question${questionNumber}ASelection">A</label>
-      <input id="question${questionNumber}ASelection" name="[questions][${questionNumber}][options]" required type="text">
-      <label for="question${questionNumber}BSelection">B</label>
-      <input id="question${questionNumber}ABelection" name="[questions][${questionNumber}][options]" required type="text">
-      <label for="rquestion${questionNumber}CSelection">C</label>
-      <input id="question${questionNumber}CSelection" name="[questions][${questionNumber}][options]" required type="text">
-      <label for="question${questionNumber}DSelection">D</label>
-      <input id="question${questionNumber}DSelection" name="[questions][${questionNumber}][options]" required type="text">
-      <p>Actual answer for question ${questionNumber}</p>
-      <input id="question${questionNumber}AAnswer" name="[questions][${questionNumber}][answer]" required type="radio" value="0">
-      <label for="question${questionNumber}AAnswer">A</label>
-      <input id="question${questionNumber}BAnswer" name="[questions][${questionNumber}][answer]" type="radio" value="1">
-      <label for="question${questionNumber}BAnswer">B</label>
-      <input id="question${questionNumber}CAnswer" name="[questions][${questionNumber}][answer]" type="radio" value="2">
-      <label for="question${questionNumber}CAnswer">C</label>
-      <input id="question${questionNumber}DAnswer" name="[questions][${questionNumber}][answer]" type="radio" value="3">
-      <label for="question${questionNumber}DAnswer">D</label>
-      <br />
+      <div class="rounds__to-add__form__questions__question" id="multipleQuestion${questionNumber}">
+        <label for="multipleQuestion${questionNumber}Q">Question</label>
+        <input id="multipleQuestion${questionNumber}Q" name="[questions][${questionNumber}][question]" required type="text">
+        <p>Possible answers for question</p>
+        <label for="question${questionNumber}ASelection">A</label>
+        <input id="question${questionNumber}ASelection" name="[questions][${questionNumber}][options]" required type="text">
+        <label for="question${questionNumber}BSelection">B</label>
+        <input id="question${questionNumber}ABelection" name="[questions][${questionNumber}][options]" required type="text">
+        <label for="rquestion${questionNumber}CSelection">C</label>
+        <input id="question${questionNumber}CSelection" name="[questions][${questionNumber}][options]" required type="text">
+        <label for="question${questionNumber}DSelection">D</label>
+        <input id="question${questionNumber}DSelection" name="[questions][${questionNumber}][options]" required type="text">
+        <p>Actual answer for question</p>
+        <input id="question${questionNumber}AAnswer" name="[questions][${questionNumber}][answer]" required type="radio" value="0">
+        <label for="question${questionNumber}AAnswer">A</label>
+        <input id="question${questionNumber}BAnswer" name="[questions][${questionNumber}][answer]" type="radio" value="1">
+        <label for="question${questionNumber}BAnswer">B</label>
+        <input id="question${questionNumber}CAnswer" name="[questions][${questionNumber}][answer]" type="radio" value="2">
+        <label for="question${questionNumber}CAnswer">C</label>
+        <input id="question${questionNumber}DAnswer" name="[questions][${questionNumber}][answer]" type="radio" value="3">
+        <label for="question${questionNumber}DAnswer">D</label>
+        <br />
     `
+    if (questionNumber > 1) {
+      htmlToInsert += `
+        <button class="rounds__to-add__form__questions__question__cancel" id="multipleQuestion${questionNumber}Cancel">Cancel question</button>
+      `
+    }
   } else if (roundType === 'picture') {
     // new question form fields
     htmlToInsert = `
-      <p>Picture ${questionNumber}</p>
-      <label class="rounds__to-add__form__questions__question" for="pictureUrl${questionNumber}">URL</label>
-      <input id="pictureUrl${questionNumber}" name="[pictures][${questionNumber}][url]" onBlur="validateImageUrl(event)" required type="text">
-      <label for="pictureAnswer${questionNumber}">Answer</label>
-      <input id="pictureAnswer${questionNumber}" name="[pictures][${questionNumber}][answer]" required type="text">
+      <div class="rounds__to-add__form__questions__question" id="pictureQuestion${questionNumber}">
+        <p>Picture</p>
+        <label for="pictureUrl${questionNumber}">URL</label>
+        <input id="pictureUrl${questionNumber}" name="[pictures][${questionNumber}][url]" onBlur="validateImageUrl(event)" required type="text">
+        <label for="pictureAnswer${questionNumber}">Answer</label>
+        <input id="pictureAnswer${questionNumber}" name="[pictures][${questionNumber}][answer]" required type="text">
+        <br />
     `
+    if (questionNumber > 1) {
+      htmlToInsert += `
+        <button class="rounds__to-add__form__questions__question__cancel" id="pictureQuestion${questionNumber}Cancel">Cancel picture</button>
+      `
+    }
   } else if (roundType === 'lightning') {
     // new question form fields
     htmlToInsert += `
-      <p>Question ${questionNumber}</p>
-      <label class="rounds__to-add__form__questions__question" for="lightningQuestion${questionNumber}">Question</label>
-      <input id="lightningQuestion${questionNumber}" name="[questions][${questionNumber}][lightningQuestion]" required type="text">
-      <label for="lightningAnswer${questionNumber}">Answer</label>
-      <input id="lightningAnswer${questionNumber}" name="[questions][${questionNumber}][lightningAnswer]" required type="text">
+      <div class="rounds__to-add__form__questions__question" id="lightningQuestion${questionNumber}">
+        <p>Question</p>
+        <label for="lightningQuestion${questionNumber}">Question</label>
+        <input id="lightningQuestion${questionNumber}" name="[questions][${questionNumber}][lightningQuestion]" required type="text">
+        <label for="lightningAnswer${questionNumber}">Answer</label>
+        <input id="lightningAnswer${questionNumber}" name="[questions][${questionNumber}][lightningAnswer]" required type="text">
+        <br />
     `
+    if (questionNumber > 1) {
+      htmlToInsert += `
+        <button class="rounds__to-add__form__questions__question__cancel" id="lightningQuestion${questionNumber}Cancel">Cancel question</button>
+      `
+    }
   }
+  htmlToInsert += '</div>'
   document.querySelector('.rounds__to-add__form__questions').insertAdjacentHTML('beforeend', htmlToInsert)
+  // cancel question buttons
+  const cancelButtons = document.querySelectorAll('.rounds__to-add__form__questions__question__cancel')
+  cancelButtons.forEach((button) => {
+    button.removeEventListener('click', cancelQuestion)
+    button.addEventListener('click', cancelQuestion)
+  })
+}
+
+function cancelQuestion (event) {
+  event.preventDefault()
+  const idOfElementToRemove = event.target.id.replace('Cancel', '')
+  document.getElementById(idOfElementToRemove).remove()
 }
 
 // display/hide saved tie breaker
