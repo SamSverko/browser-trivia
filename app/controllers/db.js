@@ -70,7 +70,6 @@ module.exports = {
   joinTrivia: async (req, res, next) => {
     const triviaToJoin = req.body['player-code']
     const playerName = req.body['player-name']
-    console.log(playerName)
     req.app.db.collection(process.env.DB_COLLECTION_NAME).find({ triviaId: triviaToJoin }).toArray((error, result) => {
       if (error) {
         const error = new Error()

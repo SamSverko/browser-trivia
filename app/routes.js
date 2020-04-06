@@ -25,7 +25,8 @@ router.get('/', (req, res) => {
   res.render('index', {
     title: 'Home',
     currentPage: req.url,
-    styles: [{ file: 'index' }]
+    styles: [{ file: 'index' }],
+    scripts: [{ file: 'index' }]
   })
 })
 

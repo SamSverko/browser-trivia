@@ -1,5 +1,6 @@
 // node
 const path = require('path')
+const querystring = require('querystring')
 
 // dependencies
 require('dotenv').config()
@@ -7,11 +8,13 @@ const HOST = process.env.APP_HOST
 const PORT = process.env.APP_PORT || 3000
 const express = require('express')
 const app = express()
+const http = require('http').createServer(app)
+const io = require('socket.io')(http)
 const compression = require('compression')
-const helmet = require('helmet')
-const exphbs = require('express-handlebars')
 const MongoClient = require('mongodb').MongoClient
 const dbUrl = process.env.DB_URI
+const helmet = require('helmet')
+const exphbs = require('express-handlebars')
 
 // local files
 const router = require(path.join(__dirname, './app/routes'))
@@ -22,6 +25,24 @@ app.use(helmet())
 // enable gzip compression and urlencoded (for form submits)
 app.use(compression())
 app.use(express.urlencoded({ extended: true }))
+
+// web socket connection
+io.on('connection', (socket) => {
+  // join room based on triviaId
+  const roomUrl = new URL(socket.handshake.headers.referer)
+  const roomCode = roomUrl.searchParams.get('roomCode')
+  socket.join(roomCode)
+  console.log(`A player connected to room ${roomCode}.`)
+  // emitting events
+  socket.on('player event', (message) => {
+    // socket.to = send to all but not sender | io.to = send to all including sender
+    socket.to(roomCode).emit('player event', message)
+  })
+  // disconnect
+  socket.on('disconnect', () => {
+    console.log(`A player disconnected from room ${roomCode}.`)
+  })
+})
 
 // database connection
 MongoClient.connect(dbUrl, {
@@ -81,6 +102,6 @@ process.on('SIGINT', function () {
 })
 
 // turn app listening on
-app.listen(PORT, () => {
+http.listen(PORT, () => {
   console.log(`Server successfully started app, listening at ${HOST}:${PORT}.`)
 })
