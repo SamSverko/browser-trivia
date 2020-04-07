@@ -1,22 +1,11 @@
-// node
-// const https = require('https')
-
 // dependencies
 require('dotenv').config()
-// const NODE_ENV = process.env.NODE_ENV
-// const apiGetProtocol = (NODE_ENV === 'production') ? require('https') : require('http')
-// const HOST_PROTOCOL = (NODE_ENV === 'production') ? 'https' : 'http'
-// const APP_HOST = process.env.APP_HOST
-// const APP_PORT = process.env.APP_PORT
-// const DB_COLLECTION_NAME = process.env.DB_COLLECTION_NAME
-// const API_VERSION = process.env.API_VERSION
 const express = require('express')
 const router = express.Router()
 const { body, validationResult } = require('express-validator')
 
 // local files
 const DbController = require('./controllers/db.js')
-// const constants = require('./constants.js')
 
 // routes
 router.get('/', (req, res) => {
@@ -32,7 +21,8 @@ router.get('/', (req, res) => {
 
 router.post('/join', [
   body('player-name').isString().notEmpty().trim().escape(),
-  body('player-code').isString().notEmpty().trim().escape().isLength(4)
+  body('room-code').isString().notEmpty().trim().escape().isLength(4),
+  body('player-uuid').isString().notEmpty().trim().escape().isLength(36)
 ], (req, res, next) => {
   console.log(`${req.method} request for ${req.url}.`)
 
@@ -115,6 +105,59 @@ router.post('/host/:triviaId', [
   } else {
     res.send('unknown round type.')
   }
+})
+
+// API
+router.get('/lobby/:triviaId', (req, res, next) => {
+  console.log(`${req.method} request for ${req.url}.`)
+
+  DbController.getLobbyData(req, res, next)
+})
+
+router.post('/lobby/addPlayer', [
+  body('name').isString().notEmpty().trim().escape(),
+  body('uniqueId').isString().notEmpty().trim().escape().isLength(36),
+  body('triviaId').isString().notEmpty().trim().escape().isLength(4)
+], (req, res, next) => {
+  console.log(`${req.method} request for ${req.url}.`)
+
+  // return any errors
+  const validationErrors = validationResult(req)
+  if (!validationErrors.isEmpty()) {
+    const error = new Error()
+    error.statusCode = 422
+    error.message = `Form validation failed:<br /><pre><code>${JSON.stringify(validationErrors.array(), undefined, 2)}</code></pre>`
+    return next(error)
+  }
+
+  DbController.addLobbyPlayer(req, res, next)
+})
+
+router.post('/lobby/removePlayer', [
+  body('name').isString().notEmpty().trim().escape(),
+  body('uniqueId').isString().notEmpty().trim().escape().isLength(36),
+  body('triviaId').isString().notEmpty().trim().escape().isLength(4)
+], (req, res, next) => {
+  console.log(`${req.method} request for ${req.url}.`)
+
+  // return any errors
+  const validationErrors = validationResult(req)
+  if (!validationErrors.isEmpty()) {
+    const error = new Error()
+    error.statusCode = 422
+    error.message = `Form validation failed:<br /><pre><code>${JSON.stringify(validationErrors.array(), undefined, 2)}</code></pre>`
+    return next(error)
+  }
+
+  DbController.removeLobbyPlayer(req, res, next)
+})
+
+router.post('/test', (req, res, next) => {
+  console.log(`${req.method} request for ${req.url}.`)
+
+  console.log(req.body)
+
+  res.send(req.body)
 })
 
 // server error handler test page

@@ -24,6 +24,23 @@ module.exports = {
       }
     })
   },
+  getLobbyData: async (req, res, next) => {
+    req.app.db.collection(process.env.DB_COLLECTION_NAME_2).find({ triviaId: req.params.triviaId }).toArray((error, result) => {
+      if (error) {
+        const error = new Error()
+        error.statusCode = 400
+        error.message = error
+        next(error)
+      } else if (result.length !== 1) {
+        const error = new Error()
+        error.statusCode = 400
+        error.message = 'Lobby not found, please try a different room code.'
+        next(error)
+      } else {
+        res.send(result[0])
+      }
+    })
+  },
   insertNewTrivia: async (req, res, next) => {
     // retrieve all existing triviaIds
     req.app.db.collection(process.env.DB_COLLECTION_NAME).find({}).project({ _id: 0, triviaId: 1 }).toArray((error, result) => {
@@ -54,6 +71,7 @@ module.exports = {
           triviaId: currentTriviaId,
           host: req.body['host-index-name']
         }
+        // insert new trivia document
         req.app.db.collection(process.env.DB_COLLECTION_NAME).insertOne(documentToInsert, (error, result) => {
           if (error) {
             const error = new Error()
@@ -61,16 +79,33 @@ module.exports = {
             error.message = error
             next(error)
           } else {
-            res.redirect(`/host/${result.ops[0].triviaId}`)
+            // insert associated lobby with newly inserted trivia document
+            const lobbyToInsert = {
+              createdAt: new Date().toISOString(),
+              triviaId: currentTriviaId,
+              host: req.body['host-index-name'],
+              players: []
+            }
+            req.app.db.collection(process.env.DB_COLLECTION_NAME_2).insertOne(lobbyToInsert, (error, result) => {
+              if (error) {
+                const error = new Error()
+                error.statusCode = 400
+                error.message = error
+                next(error)
+              } else {
+                res.redirect(`/host/${result.ops[0].triviaId}`)
+              }
+            })
           }
         })
       }
     })
   },
   joinTrivia: async (req, res, next) => {
-    const triviaToJoin = req.body['player-code']
+    const triviaToJoin = req.body['room-code'].toLowerCase()
     const playerName = req.body['player-name']
-    req.app.db.collection(process.env.DB_COLLECTION_NAME).find({ triviaId: triviaToJoin }).toArray((error, result) => {
+    const playerUuid = req.body['player-uuid']
+    req.app.db.collection(process.env.DB_COLLECTION_NAME_2).find({ triviaId: triviaToJoin }).toArray((error, result) => {
       if (error) {
         const error = new Error()
         error.statusCode = 400
@@ -82,15 +117,86 @@ module.exports = {
         error.message = 'Trivia not found, please try a different room code.'
         next(error)
       } else {
-        res.render('lobby', {
-          title: 'Lobby',
-          triviaData: JSON.stringify(result[0]),
-          playerName: playerName,
-          scripts: [{ file: 'lobby' }],
-          styles: [{ file: 'lobby' }]
-        })
+        const triviaData = JSON.stringify(result[0])
+        req.app.db.collection(process.env.DB_COLLECTION_NAME_2).updateOne({ triviaId: triviaToJoin },
+          {
+            $addToSet: {
+              players: {
+                name: playerName,
+                uniqueId: playerUuid
+              }
+            }
+          }, (error, result) => {
+            if (error) {
+              const error = new Error()
+              error.statusCode = 400
+              error.message = error
+              next(error)
+            } else {
+              res.render('lobby', {
+                title: 'Lobby',
+                triviaData: triviaData,
+                playerName: playerName,
+                scripts: [{ file: 'lobby' }],
+                styles: [{ file: 'lobby' }]
+              })
+            }
+          })
       }
     })
+  },
+  addLobbyPlayer: async (req, res, next) => {
+    const triviaToJoin = req.body.triviaId.toLowerCase()
+    const playerName = req.body.name
+    const playerUuid = req.body.uniqueId
+    req.app.db.collection(process.env.DB_COLLECTION_NAME_2).find({ triviaId: triviaToJoin }).toArray((error, result) => {
+      if (error) {
+        const error = new Error()
+        error.statusCode = 400
+        error.message = error
+        next(error)
+      } else if (result.length !== 1) {
+        const error = new Error()
+        error.statusCode = 400
+        error.message = 'Trivia not found, please try a different room code.'
+        next(error)
+      } else {
+        // const triviaData = JSON.stringify(result[0])
+        req.app.db.collection(process.env.DB_COLLECTION_NAME_2).updateOne({ triviaId: triviaToJoin },
+          {
+            $addToSet: {
+              players: {
+                name: playerName,
+                uniqueId: playerUuid
+              }
+            }
+          }, (error, result) => {
+            if (error) {
+              const error = new Error()
+              error.statusCode = 400
+              error.message = error
+              next(error)
+            } else {
+              res.send('Ok')
+            }
+          })
+      }
+    })
+  },
+  removeLobbyPlayer: async (req, res, next) => {
+    req.app.db.collection(process.env.DB_COLLECTION_NAME_2).updateOne({ triviaId: req.body.triviaId },
+      {
+        $pull: { players: { name: req.body.name, uniqueId: req.body.uniqueId } }
+      }, (error, result) => {
+        if (error) {
+          const error = new Error()
+          error.statusCode = 400
+          error.message = error
+          next(error)
+        } else {
+          res.send('ok')
+        }
+      })
   },
   removeRound: async (req, res, next) => {
     const roundToRemove = `rounds.${req.query.removeRound}`

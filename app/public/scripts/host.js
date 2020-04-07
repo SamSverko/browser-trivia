@@ -1,6 +1,5 @@
 /* global triviaData */
 
-// on page load
 document.addEventListener('DOMContentLoaded', () => {
   console.log(triviaData)
 
@@ -39,7 +38,6 @@ document.addEventListener('DOMContentLoaded', () => {
   validateImageUrl()
 }, false)
 
-// adding a new round
 function addRound () {
   // hide add a round selection and display current round you are adding
   document.querySelector('.rounds__select-type').style.display = 'none'
@@ -127,7 +125,6 @@ function addRound () {
   document.querySelector('.rounds__to-add__form__add-question').click()
 }
 
-// adding additional questions to round
 function addAdditionalQuestion (roundType) {
   // save number of existing questions
   const questionNumber = 1 + (document.getElementsByClassName('rounds__to-add__form__questions__question').length)
@@ -212,7 +209,6 @@ function cancelQuestion (event) {
   document.getElementById(idOfElementToRemove).remove()
 }
 
-// display/hide saved tie breaker
 function checkTieBreakerStatus () {
   const addTieBreakerContainer = document.querySelector('.tie-breaker__add')
   const tieBreakerContainer = document.querySelector('.tie-breaker')
@@ -227,7 +223,6 @@ function checkTieBreakerStatus () {
   }
 }
 
-// check if trivia is ready to be hosted
 function checkTriviaStatus () {
   // initialize as showing all items
   const hostTriviaButton = document.querySelector('.host-trivia-form__submit')
@@ -246,7 +241,6 @@ function checkTriviaStatus () {
   hostTriviaButton.disabled = (helpContainer.style.display !== 'none')
 }
 
-// display saved rounds
 function displayExistingRounds () {
   let htmlToInsert = ''
   for (let i = 0; i < triviaData.rounds.length; i++) {

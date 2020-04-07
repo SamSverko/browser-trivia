@@ -1,6 +1,7 @@
 // node
 const path = require('path')
-const querystring = require('querystring')
+const httpPost = require('http')
+const bodyParser = require('body-parser')
 
 // dependencies
 require('dotenv').config()
@@ -22,9 +23,10 @@ const router = require(path.join(__dirname, './app/routes'))
 // helmet
 app.use(helmet())
 
-// enable gzip compression and urlencoded (for form submits)
+// enable gzip compression, urlencoded (for form submits), and bodyParser for JSON posts
 app.use(compression())
 app.use(express.urlencoded({ extended: true }))
+app.use(bodyParser.json())
 
 // web socket connection
 io.on('connection', (socket) => {
@@ -32,16 +34,53 @@ io.on('connection', (socket) => {
   const roomUrl = new URL(socket.handshake.headers.referer)
   const roomCode = roomUrl.searchParams.get('roomCode')
   socket.join(roomCode)
-  console.log(`A player connected to room ${roomCode}.`)
   // emitting events
+  // a player joins the lobby
+  socket.on('played joined', (player, playerId) => {
+    console.log(`A player joined room ${roomCode}.`)
+    io.to(roomCode).emit('player joined', player, playerId)
+    // a player disconnects from the lobby
+    socket.on('disconnect', (event) => {
+      console.log(`${player} left room ${roomCode}.`)
+      // send POST request to remove player from lobby db
+      const postData = JSON.stringify({
+        name: player,
+        uniqueId: playerId,
+        triviaId: roomCode
+      })
+      const options = {
+        hostname: 'localhost',
+        port: 3000,
+        path: '/lobby/removePlayer',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': postData.length
+        }
+      }
+      const req = httpPost.request(options, (res) => {
+        console.log(`statusCode: ${res.statusCode}`)
+        res.on('data', (d) => {
+          process.stdout.write(d)
+          io.to(roomCode).emit('player disconnected', player, playerId)
+        })
+        req.on('error', (error) => {
+          console.error(error)
+        })
+      })
+      req.write(postData)
+      req.end()
+    })
+  })
   socket.on('player event', (message) => {
     // socket.to = send to all but not sender | io.to = send to all including sender
     socket.to(roomCode).emit('player event', message)
   })
-  // disconnect
-  socket.on('disconnect', () => {
-    console.log(`A player disconnected from room ${roomCode}.`)
-  })
+  // // disconnect
+  // socket.on('disconnect', (event) => {
+  //   console.log(event)
+  //   console.log(`A player disconnected from room ${roomCode}.`)
+  // })
 })
 
 // database connection
