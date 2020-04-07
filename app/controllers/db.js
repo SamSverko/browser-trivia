@@ -183,6 +183,24 @@ module.exports = {
       }
     })
   },
+  readyTrivia: async (req, res, next) => {
+    req.app.db.collection(process.env.DB_COLLECTION_NAME).find({ triviaId: req.body.triviaId }).toArray((error, result) => {
+      if (error) {
+        const error = new Error()
+        error.statusCode = 400
+        error.message = error
+        next(error)
+      } else {
+        res.render('lobby', {
+          title: 'Lobby',
+          triviaData: JSON.stringify(result[0]),
+          playerName: result[0].host,
+          scripts: [{ file: 'lobby' }],
+          styles: [{ file: 'lobby' }]
+        })
+      }
+    })
+  },
   removeLobbyPlayer: async (req, res, next) => {
     req.app.db.collection(process.env.DB_COLLECTION_NAME_2).updateOne({ triviaId: req.body.triviaId },
       {

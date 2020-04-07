@@ -7,7 +7,7 @@ const { body, validationResult } = require('express-validator')
 // local files
 const DbController = require('./controllers/db.js')
 
-// routes
+// view routes (they return page views + data)
 router.get('/', (req, res) => {
   console.log(`${req.method} request for ${req.url}.`)
 
@@ -87,7 +87,8 @@ router.post('/host/:triviaId', [
   body('questions.*.lightningQuestion').isString().notEmpty().trim().escape().optional(),
   body('questions.*.lightningAnswer').isString().notEmpty().trim().escape().optional(),
   body('tieBreaker.question').isString().notEmpty().trim().escape().optional(),
-  body('tieBreaker.answer').trim().escape().toInt().notEmpty().optional()
+  body('tieBreaker.answer').trim().escape().toInt().notEmpty().optional(),
+  body('triviaId').isString().notEmpty().trim().escape().isLength(4).optional()
 ], (req, res, next) => {
   console.log(`${req.method} request for ${req.url}.`)
 
@@ -102,12 +103,14 @@ router.post('/host/:triviaId', [
 
   if (req.query.addRound === 'multipleChoice' || req.query.addRound === 'picture' || req.query.addRound === 'lightning' || req.query.addRound === 'tieBreaker') {
     DbController.updateExistingTrivia(req, res, next)
+  } else if (req.query.host) {
+    DbController.readyTrivia(req, res, next)
   } else {
     res.send('unknown round type.')
   }
 })
 
-// API
+// API routes (they return only data)
 router.get('/lobby/:triviaId', (req, res, next) => {
   console.log(`${req.method} request for ${req.url}.`)
 
@@ -150,14 +153,6 @@ router.post('/lobby/removePlayer', [
   }
 
   DbController.removeLobbyPlayer(req, res, next)
-})
-
-router.post('/test', (req, res, next) => {
-  console.log(`${req.method} request for ${req.url}.`)
-
-  console.log(req.body)
-
-  res.send(req.body)
 })
 
 // server error handler test page

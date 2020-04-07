@@ -48,8 +48,11 @@ io.on('connection', (socket) => {
         uniqueId: playerId,
         triviaId: roomCode
       })
+      const host = new URL(socket.handshake.headers.host)
+      const filteredHost = host.protocol.replace(':', '')
+      console.log(filteredHost)
       const options = {
-        hostname: 'localhost',
+        hostname: filteredHost,
         port: 3000,
         path: '/lobby/removePlayer',
         method: 'POST',
