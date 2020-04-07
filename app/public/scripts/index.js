@@ -1,12 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
   // create unique session key (to avoid duplicate player inserts into lobby collection)
-  const playerId = (window.localStorage.getItem('playerId')) ? window.localStorage.getItem('playerId') : window.localStorage.setItem('playerId', generateUUID())
-
-  insertIDToForm(playerId)
+  let playerId = ''
+  if (window.localStorage.getItem('playerId') === null) {
+    window.localStorage.setItem('playerId', generateUUID())
+  }
+  playerId = window.localStorage.getItem('playerId')
+  console.log(playerId)
+  insertIDToForms(playerId)
   updateFormAction()
 }, false)
 
-function insertIDToForm (uuid) {
+function insertIDToForms (uuid) {
   const htmlToInsert = `
     <input name="player-uuid" type="hidden" value="${uuid}" />
   `
