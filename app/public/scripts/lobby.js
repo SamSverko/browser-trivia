@@ -8,10 +8,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // web socket
   const socket = io()
+  socket.heartbeatTimeout = 10000
 
   // socket to everyone that this player has joined
   const playerId = window.localStorage.getItem('playerId')
-  console.log(playerId)
   socket.emit('played joined', playerName, playerId)
 
   // post user to db in case user disconnected properly, but was not added back to the lobby db
@@ -19,8 +19,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // when a player joins the lobby
   socket.on('player joined', (playerName, playerId) => {
-    console.log(`${playerName}, ${playerId} joined the lobby!`)
-    getLobbyData()
+    window.setTimeout(() => {
+      console.log(`${playerName}, ${playerId} joined the lobby!`)
+      getLobbyData()
+    }, 2000)
   })
 
   // when a player leaves the lobby
