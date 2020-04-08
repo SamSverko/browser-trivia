@@ -7,14 +7,18 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('hostName').innerHTML = triviaData.host
   document.getElementById('hostTriviaId').innerHTML = triviaData.triviaId
 
-  // set host trivia form actions
+  // set tie breaker form action
   document.querySelector('.tie-breaker__add__form').action = `/host/${triviaData.triviaId}?addRound=tieBreaker`
+
+  // set host trivia form data and form action
   const htmlToInsert = `
-  <input name="triviaId" type="hidden" value="${triviaData.triviaId}" />
+  <input name="player-name" type="hidden" value="${triviaData.host}" />
+  <input name="room-code" type="hidden" value="${triviaData.triviaId}" />
+  <input name="player-uuid" type="hidden" value="${window.localStorage.getItem('playerId')}" />
   `
   const formElement = document.getElementById('hostForm')
   formElement.insertAdjacentHTML('beforeend', htmlToInsert)
-  formElement.action = `/host/${triviaData.triviaId}?host=true`
+  formElement.action = `/join?roomCode=${triviaData.triviaId}`
 
   // update rounds display
   if ('rounds' in triviaData && triviaData.rounds !== null) {

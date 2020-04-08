@@ -101,8 +101,6 @@ router.post('/host/:triviaId', [
 
   if (req.query.addRound === 'multipleChoice' || req.query.addRound === 'picture' || req.query.addRound === 'lightning' || req.query.addRound === 'tieBreaker') {
     DbController.updateExistingTrivia(req, res, next)
-  } else if (req.query.host) {
-    DbController.readyTrivia(req, res, next)
   } else {
     res.redirect('/')
   }
