@@ -9,6 +9,7 @@ const HOST = process.env.APP_HOST
 const PORT = process.env.APP_PORT || 3000
 const express = require('express')
 const app = express()
+const cors = require('cors')
 const http = require('http').createServer(app)
 const io = require('socket.io')(http, { pingTimeout: 10000, pingInterval: 5000 })
 const compression = require('compression')
@@ -20,15 +21,16 @@ const exphbs = require('express-handlebars')
 // local files
 const router = require(path.join(__dirname, './app/routes'))
 
-// helmet
+// helmet and cors
 app.use(helmet())
+app.use(cors())
 
 // enable gzip compression, urlencoded (for form submits), and bodyParser for JSON posts
 app.use(compression())
 app.use(express.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 
-// web socket connection
+// web socket connection | socket.to = send to all but not sender | io.to = send to all including sender
 io.on('connection', (socket) => {
   // join room based on triviaId
   const roomUrl = new URL(socket.handshake.headers.referer)
@@ -48,9 +50,7 @@ io.on('connection', (socket) => {
         uniqueId: playerId,
         triviaId: roomCode
       })
-      const host = new URL(socket.handshake.headers.host)
-      const filteredHost = host.protocol.replace(':', '')
-      console.log(filteredHost)
+      const filteredHost = socket.handshake.headers.host.substring(0, socket.handshake.headers.host.indexOf(':'))
       const options = {
         hostname: filteredHost,
         port: 3000,
@@ -76,14 +76,8 @@ io.on('connection', (socket) => {
     })
   })
   socket.on('player event', (message) => {
-    // socket.to = send to all but not sender | io.to = send to all including sender
     socket.to(roomCode).emit('player event', message)
   })
-  // // disconnect
-  // socket.on('disconnect', (event) => {
-  //   console.log(event)
-  //   console.log(`A player disconnected from room ${roomCode}.`)
-  // })
 })
 
 // database connection
