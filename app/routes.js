@@ -22,7 +22,8 @@ router.get('/', (req, res) => {
 router.post('/join', [
   body('player-name').isString().notEmpty().trim().escape(),
   body('room-code').isString().notEmpty().trim().escape().isLength(4),
-  body('player-uuid').isString().notEmpty().trim().escape().isLength(36)
+  body('player-uuid').isString().notEmpty().trim().escape().isLength(36),
+  body('is-host').isBoolean().optional()
 ], (req, res, next) => {
   console.log(`${req.method} request for ${req.url}.`)
 
@@ -85,8 +86,7 @@ router.post('/host/:triviaId', [
   body('questions.*.lightningQuestion').isString().notEmpty().trim().escape().optional(),
   body('questions.*.lightningAnswer').isString().notEmpty().trim().escape().optional(),
   body('tieBreaker.question').isString().notEmpty().trim().escape().optional(),
-  body('tieBreaker.answer').trim().escape().toInt().notEmpty().optional(),
-  body('triviaId').isString().notEmpty().trim().escape().isLength(4).optional()
+  body('tieBreaker.answer').trim().escape().toInt().notEmpty().optional()
 ], (req, res, next) => {
   console.log(`${req.method} request for ${req.url}.`)
 

@@ -8,7 +8,32 @@ document.addEventListener('DOMContentLoaded', () => {
   console.log(playerId)
   insertIDToForms(playerId)
   updateFormAction()
+  handleQueryParams()
 }, false)
+
+function generateUUID () {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = Math.random() * 16 | 0
+    const v = c === 'x' ? r : (r & 0x3 | 0x8)
+    return v.toString(16)
+  })
+}
+
+function handleQueryParams () {
+  const urlParams = new URLSearchParams(window.location.search)
+
+  const doesTriviaExist = urlParams.get('triviaNotFound')
+  if (doesTriviaExist) {
+    console.log('TRIVIA NOT FOUND!')
+  } else {
+    console.log('TRIVIA FOUND!')
+  }
+
+  const isLobbyReady = urlParams.get('lobbyNotReady')
+  if (isLobbyReady) {
+    console.log('LOBBY IS NOT READY!')
+  }
+}
 
 function insertIDToForms (uuid) {
   const htmlToInsert = `
@@ -21,12 +46,4 @@ function updateFormAction (event) {
   if (event !== undefined) {
     document.querySelector('.form__player').action = (event.target.value !== '') ? `/join?roomCode=${event.target.value}` : '/'
   }
-}
-
-function generateUUID () {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    const r = Math.random() * 16 | 0
-    const v = c === 'x' ? r : (r & 0x3 | 0x8)
-    return v.toString(16)
-  })
 }

@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
   <input name="player-name" type="hidden" value="${triviaData.host}" />
   <input name="room-code" type="hidden" value="${triviaData.triviaId}" />
   <input name="player-uuid" type="hidden" value="${window.localStorage.getItem('playerId')}" />
+  <input name="is-host" type="hidden" value="true" />
   `
   const formElement = document.getElementById('hostForm')
   formElement.insertAdjacentHTML('beforeend', htmlToInsert)

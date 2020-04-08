@@ -105,6 +105,7 @@ module.exports = {
     const triviaToJoin = req.body['room-code'].toLowerCase()
     const playerName = req.body['player-name'].toLowerCase()
     const playerUuid = req.body['player-uuid'].toLowerCase()
+    const isHost = (req.body['is-host'] === 'true')
     req.app.db.collection(process.env.DB_COLLECTION_NAME_2).find({ triviaId: triviaToJoin }).toArray((error, result) => {
       if (error) {
         const error = new Error()
@@ -112,36 +113,37 @@ module.exports = {
         error.message = error
         next(error)
       } else if (result.length !== 1) {
-        const error = new Error()
-        error.statusCode = 400
-        error.message = 'Trivia not found, please try a different room code.'
-        next(error)
+        res.redirect('/?triviaNotFound=true')
       } else {
         const triviaData = JSON.stringify(result[0])
-        req.app.db.collection(process.env.DB_COLLECTION_NAME_2).updateOne({ triviaId: triviaToJoin },
-          {
-            $addToSet: {
-              players: {
-                name: playerName,
-                uniqueId: playerUuid
+        if (isHost || result[0].players.length > 0) {
+          req.app.db.collection(process.env.DB_COLLECTION_NAME_2).updateOne({ triviaId: triviaToJoin },
+            {
+              $addToSet: {
+                players: {
+                  name: playerName,
+                  uniqueId: playerUuid
+                }
               }
-            }
-          }, (error, result) => {
-            if (error) {
-              const error = new Error()
-              error.statusCode = 400
-              error.message = error
-              next(error)
-            } else {
-              res.render('lobby', {
-                title: 'Lobby',
-                triviaData: triviaData,
-                playerName: playerName,
-                scripts: [{ file: 'lobby' }],
-                styles: [{ file: 'lobby' }]
-              })
-            }
-          })
+            }, (error, result) => {
+              if (error) {
+                const error = new Error()
+                error.statusCode = 400
+                error.message = error
+                next(error)
+              } else {
+                res.render('lobby', {
+                  title: 'Lobby',
+                  triviaData: triviaData,
+                  playerName: playerName,
+                  scripts: [{ file: 'lobby' }],
+                  styles: [{ file: 'lobby' }]
+                })
+              }
+            })
+        } else {
+          res.redirect('/?lobbyNotReady=true')
+        }
       }
     })
   },
