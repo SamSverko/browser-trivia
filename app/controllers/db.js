@@ -68,8 +68,8 @@ module.exports = {
         // insert new trivia into database
         const documentToInsert = {
           createdAt: new Date().toISOString(),
-          triviaId: currentTriviaId,
-          host: req.body['host-index-name']
+          triviaId: currentTriviaId.toLowerCase(),
+          host: req.body['host-index-name'].toLowerCase()
         }
         // insert new trivia document
         req.app.db.collection(process.env.DB_COLLECTION_NAME).insertOne(documentToInsert, (error, result) => {
@@ -82,8 +82,8 @@ module.exports = {
             // insert associated lobby with newly inserted trivia document
             const lobbyToInsert = {
               createdAt: new Date().toISOString(),
-              triviaId: currentTriviaId,
-              host: req.body['host-index-name'],
+              triviaId: currentTriviaId.toLowerCase(),
+              host: req.body['host-index-name'].toLowerCase(),
               players: []
             }
             req.app.db.collection(process.env.DB_COLLECTION_NAME_2).insertOne(lobbyToInsert, (error, result) => {
@@ -103,8 +103,8 @@ module.exports = {
   },
   joinTrivia: async (req, res, next) => {
     const triviaToJoin = req.body['room-code'].toLowerCase()
-    const playerName = req.body['player-name']
-    const playerUuid = req.body['player-uuid']
+    const playerName = req.body['player-name'].toLowerCase()
+    const playerUuid = req.body['player-uuid'].toLowerCase()
     req.app.db.collection(process.env.DB_COLLECTION_NAME_2).find({ triviaId: triviaToJoin }).toArray((error, result) => {
       if (error) {
         const error = new Error()
@@ -147,8 +147,8 @@ module.exports = {
   },
   addLobbyPlayer: async (req, res, next) => {
     const triviaToJoin = req.body.triviaId.toLowerCase()
-    const playerName = req.body.name
-    const playerUuid = req.body.uniqueId
+    const playerName = req.body.name.toLowerCase()
+    const playerUuid = req.body.uniqueId.toLowerCase()
     req.app.db.collection(process.env.DB_COLLECTION_NAME_2).find({ triviaId: triviaToJoin }).toArray((error, result) => {
       if (error) {
         const error = new Error()
@@ -204,7 +204,7 @@ module.exports = {
   removeLobbyPlayer: async (req, res, next) => {
     req.app.db.collection(process.env.DB_COLLECTION_NAME_2).updateOne({ triviaId: req.body.triviaId },
       {
-        $pull: { players: { name: req.body.name, uniqueId: req.body.uniqueId } }
+        $pull: { players: { name: req.body.name.toLowerCase(), uniqueId: req.body.uniqueId.toLowerCase() } }
       }, (error, result) => {
         if (error) {
           const error = new Error()
@@ -251,24 +251,43 @@ module.exports = {
   updateExistingTrivia: async (req, res, next) => {
     const roundToInsert = {}
     roundToInsert.type = req.body.type
-    roundToInsert.theme = (req.body.theme !== '') ? req.body.theme : 'none'
+    if (req.body.theme) {
+      roundToInsert.theme = (req.body.theme !== '') ? req.body.theme.toLowerCase() : 'none'
+    }
     roundToInsert.pointValue = (Number.isInteger(req.body.pointValue)) ? req.body.pointValue : 1
     if (req.query.addRound === 'multipleChoice') {
-      roundToInsert.questions = req.body.questions
+      roundToInsert.questions = []
+      for (let i = 0; i < req.body.questions.length; i++) {
+        const options = []
+        for (let j = 0; j < req.body.questions[i].options.length; j++) {
+          options.push(req.body.questions[i].options[j].toLowerCase())
+        }
+        roundToInsert.questions.push({
+          question: req.body.questions[i].question.toLowerCase(),
+          options: options,
+          answer: req.body.questions[i].answer
+        })
+      }
     } else if (req.query.addRound === 'picture') {
-      roundToInsert.pictures = req.body.pictures
+      roundToInsert.pictures = []
+      for (let i = 0; i < req.body.pictures.length; i++) {
+        roundToInsert.pictures.push({
+          url: req.body.pictures[i].url,
+          answer: req.body.pictures[i].answer.toLowerCase()
+        })
+      }
     } else if (req.query.addRound === 'lightning') {
       const fixedQuestionKeys = []
       for (let i = 0; i < req.body.questions.length; i++) {
         fixedQuestionKeys.push({
-          question: req.body.questions[i].lightningQuestion,
-          answer: req.body.questions[i].lightningAnswer
+          question: req.body.questions[i].lightningQuestion.toLowerCase(),
+          answer: req.body.questions[i].lightningAnswer.toLowerCase()
         })
       }
       roundToInsert.questions = fixedQuestionKeys
     } else if (req.query.addRound === 'tieBreaker') {
       const tieBreakerToInsert = {
-        question: req.body.tieBreaker.question,
+        question: req.body.tieBreaker.question.toLowerCase(),
         answer: req.body.tieBreaker.answer
       }
       req.app.db.collection(process.env.DB_COLLECTION_NAME).updateOne({ triviaId: req.params.triviaId },

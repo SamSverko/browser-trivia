@@ -9,7 +9,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // set host trivia form actions
   document.querySelector('.tie-breaker__add__form').action = `/host/${triviaData.triviaId}?addRound=tieBreaker`
-  document.getElementById('hostForm').action = `/host/${triviaData.triviaId}`
+  const htmlToInsert = `
+  <input name="triviaId" type="hidden" value="${triviaData.triviaId}" />
+  `
+  const formElement = document.getElementById('hostForm')
+  formElement.insertAdjacentHTML('beforeend', htmlToInsert)
+  formElement.action = `/host/${triviaData.triviaId}?host=true`
 
   // update rounds display
   if ('rounds' in triviaData && triviaData.rounds !== null) {

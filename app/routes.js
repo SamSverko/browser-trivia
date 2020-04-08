@@ -66,10 +66,8 @@ router.get('/host/:triviaId', (req, res, next) => {
   console.log(`${req.method} request for ${req.url}.`)
 
   if (req.query.removeRound) {
-    console.log('remove round')
     DbController.removeRound(req, res, next)
   } else {
-    console.log('regular get')
     DbController.findTrivia(req, res, next)
   }
 })
@@ -106,7 +104,7 @@ router.post('/host/:triviaId', [
   } else if (req.query.host) {
     DbController.readyTrivia(req, res, next)
   } else {
-    res.send('unknown round type.')
+    res.redirect('/')
   }
 })
 
