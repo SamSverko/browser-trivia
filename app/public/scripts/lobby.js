@@ -43,6 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // to fix stupid standard js linting error
   hostPerformAction('test')
+  playerRecordResponse()
 }, false)
 
 function getLobbyData () {
@@ -81,6 +82,33 @@ function postPlayerToDb (name, uniqueId) {
   xhttp.open('POST', '/lobby/addPlayer', true)
   xhttp.setRequestHeader('Content-type', 'application/json;charset=UTF-8')
   xhttp.send(JSON.stringify({ name: name, uniqueId: uniqueId, triviaId: lobbyData.triviaId }))
+}
+
+function playerPostResponseToDb (roundNumber, roundType, questionNumber, response) {
+  const dataToSend = {
+    player: {
+      name: playerName,
+      triviaId: lobbyData.triviaId,
+      uniqueId: window.localStorage.getItem('playerId')
+    },
+    response: {
+      roundNumber: roundNumber,
+      roundType: roundType,
+      questionNumber: questionNumber,
+      response: response
+    }
+  }
+
+  const xhttp = new XMLHttpRequest()
+  xhttp.onreadystatechange = function () {
+    if (this.readyState === 4 && this.status === 200) {
+      const responseData = JSON.parse(this.responseText)
+      console.log(responseData)
+    }
+  }
+  xhttp.open('POST', '/lobby/recordPlayerResponse', true)
+  xhttp.setRequestHeader('Content-type', 'application/json;charset=UTF-8')
+  xhttp.send(JSON.stringify(dataToSend))
 }
 
 function displayParticipantContent () {
@@ -267,6 +295,10 @@ function hostPerformAction (element) {
       questionToSend.question = triviaData.rounds[roundNumber].questions[questionNumber].question
     }
   } if (element.id === 'hostTieBreakerToggleDisplay') {
+    // update host display
+    element.classList.add('active')
+    element.innerHTML = 'Showing for players'
+    // compile question data to send to players
     questionToSend.type = 'tieBreaker'
     questionToSend.question = triviaData.tieBreaker.question
   }
@@ -276,7 +308,6 @@ function hostPerformAction (element) {
 }
 
 function playerDisplayHostAction (data) {
-  // console.log(data)
   const questionContainer = document.querySelector('.lobby__player__round-display')
   questionContainer.innerHTML = ''
   let htmlToInsert = ''
@@ -328,23 +359,29 @@ function playerDisplayHostAction (data) {
 }
 
 function playerRecordResponse (roundNumber, roundType, questionNumber, response) {
+  if (!roundNumber && !roundType && !questionNumber && !response) {
+    return
+  }
   // local response display
   const responseLocation = document.getElementById('playerRecordedResponse')
   if (roundType === 'multipleChoice') {
+    let displayResponse = ''
     if (response === 0) {
-      response = 'A'
+      displayResponse = 'A'
     } else if (response === 1) {
-      response = 'B'
+      displayResponse = 'B'
     } else if (response === 2) {
-      response = 'C'
+      displayResponse = 'C'
     } else if (response === 3) {
-      response = 'D'
+      displayResponse = 'D'
     }
-    responseLocation.innerHTML = `Your response: ${response}`
+    responseLocation.innerHTML = `Your response: ${displayResponse}`
+    playerPostResponseToDb(roundNumber, roundType, questionNumber, response)
   } else if (roundType === 'picture' || roundType === 'lightning' || roundType === 'tieBreaker') {
     const playerResponse = document.getElementById(response).value
     if (playerResponse.length > 0) {
       responseLocation.innerHTML = `Your response: ${playerResponse}`
+      playerPostResponseToDb(roundNumber, roundType, questionNumber, playerResponse)
     }
   }
 }

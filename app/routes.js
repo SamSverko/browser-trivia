@@ -157,6 +157,30 @@ router.post('/lobby/removePlayer', [
   DbController.removeLobbyPlayer(req, res, next)
 })
 
+router.post('/lobby/recordPlayerResponse', [
+  body('player.name').isString().notEmpty().trim().escape(),
+  body('player.triviaId').isString().notEmpty().trim().escape().isLength(4),
+  body('player.uniqueId').isString().notEmpty().trim().escape().isLength(36),
+  body('response.roundNumber').isInt().optional(),
+  body('response.roundType').isString().isIn(['multipleChoice', 'picture', 'lightning', 'tieBreaker']),
+  body('response.questionNumber').isInt().optional(),
+  body('response.response').notEmpty().trim().escape()
+], (req, res, next) => {
+  console.log(`${req.method} request for ${req.url}.`)
+
+  // return any errors
+  const validationErrors = validationResult(req)
+  if (!validationErrors.isEmpty()) {
+    const error = new Error()
+    error.statusCode = 422
+    error.message = `Form validation failed:<br /><pre><code>${JSON.stringify(validationErrors.array(), undefined, 2)}</code></pre>`
+    return next(error)
+  }
+
+  DbController.savePlayerResponse(req, res, next)
+  // res.send(req.body)
+})
+
 // server error handler test page
 router.get('/error', (req, res, next) => {
   const error = new Error()

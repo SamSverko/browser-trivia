@@ -260,7 +260,47 @@ module.exports = {
       })
   },
   savePlayerResponse: async (req, res, next) => {
-    res.send('ok')
+    const playerResponse = (isNaN(req.body.response.response)) ? req.body.response.response.toLowerCase() : parseInt(req.body.response.response)
+    req.app.db.collection(process.env.DB_COLLECTION_NAME_2).updateOne({ triviaId: req.body.player.triviaId },
+      {
+        $pull: {
+          responses: {
+            name: req.body.player.name.toLowerCase(),
+            uniqueId: req.body.player.uniqueId.toLowerCase(),
+            roundNumber: req.body.response.roundNumber,
+            questionNumber: req.body.response.questionNumber
+          }
+        }
+      }, (error, result) => {
+        if (error) {
+          const error = new Error()
+          error.statusCode = 400
+          error.message = error
+          next(error)
+        } else {
+          req.app.db.collection(process.env.DB_COLLECTION_NAME_2).updateOne({ triviaId: req.body.player.triviaId },
+            {
+              $addToSet: {
+                responses: {
+                  name: req.body.player.name.toLowerCase(),
+                  uniqueId: req.body.player.uniqueId.toLowerCase(),
+                  roundNumber: req.body.response.roundNumber,
+                  questionNumber: req.body.response.questionNumber,
+                  response: playerResponse
+                }
+              }
+            }, (error, result) => {
+              if (error) {
+                const error = new Error()
+                error.statusCode = 400
+                error.message = error
+                next(error)
+              } else {
+                res.send(req.body)
+              }
+            })
+        }
+      })
   },
   updateExistingTrivia: async (req, res, next) => {
     const roundToInsert = {}
