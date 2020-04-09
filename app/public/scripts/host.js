@@ -262,7 +262,7 @@ function displayExistingRounds () {
         <p>Round ${i + 1}</p>
         <button class="rounds__existing__round__cancel" id="round${i}Cancel">Remove round</button>
         <p>Type: ${roundType}</p>
-        <p>Type: ${triviaData.rounds[i].theme}</p>
+        <p>Theme: ${triviaData.rounds[i].theme}</p>
         <p>Point value: ${triviaData.rounds[i].pointValue}</p>
         <p>Number of ${questionOrPicture}: ${numberOfQuestions}</p>
         <details>

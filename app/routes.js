@@ -19,6 +19,12 @@ router.get('/', (req, res) => {
   })
 })
 
+router.get('/join', (req, res) => {
+  console.log(`${req.method} request for ${req.url}.`)
+
+  res.redirect('/')
+})
+
 router.post('/join', [
   body('player-name').isString().notEmpty().trim().escape(),
   body('room-code').isString().notEmpty().trim().escape().isLength(4),

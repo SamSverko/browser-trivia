@@ -115,14 +115,15 @@ module.exports = {
       } else if (result.length !== 1) {
         res.redirect('/?triviaNotFound=true')
       } else {
-        const triviaData = JSON.stringify(result[0])
-        if (isHost || result[0].players.length > 0) {
+        const lobbyData = JSON.stringify(result[0])
+        if (!isHost && result[0].players.length > 0) {
           req.app.db.collection(process.env.DB_COLLECTION_NAME_2).updateOne({ triviaId: triviaToJoin },
             {
               $addToSet: {
                 players: {
                   name: playerName,
-                  uniqueId: playerUuid
+                  uniqueId: playerUuid,
+                  responses: []
                 }
               }
             }, (error, result) => {
@@ -134,13 +135,37 @@ module.exports = {
               } else {
                 res.render('lobby', {
                   title: 'Lobby',
-                  triviaData: triviaData,
+                  triviaData: false,
+                  lobbyData: lobbyData,
                   playerName: playerName,
                   scripts: [{ file: 'lobby' }],
                   styles: [{ file: 'lobby' }]
                 })
               }
             })
+        } else if (isHost) {
+          req.app.db.collection(process.env.DB_COLLECTION_NAME).find({ triviaId: triviaToJoin }).toArray((error, result) => {
+            if (error) {
+              const error = new Error()
+              error.statusCode = 400
+              error.message = error
+              next(error)
+            } else if (result.length !== 1) {
+              const error = new Error()
+              error.statusCode = 400
+              error.message = 'Trivia not found, please try a different room code.'
+              next(error)
+            } else {
+              res.render('lobby', {
+                title: 'Lobby',
+                triviaData: JSON.stringify(result[0]),
+                lobbyData: lobbyData,
+                playerName: playerName,
+                scripts: [{ file: 'lobby' }],
+                styles: [{ file: 'lobby' }]
+              })
+            }
+          })
         } else {
           res.redirect('/?lobbyNotReady=true')
         }
@@ -151,25 +176,25 @@ module.exports = {
     const triviaToJoin = req.body.triviaId.toLowerCase()
     const playerName = req.body.name.toLowerCase()
     const playerUuid = req.body.uniqueId.toLowerCase()
-    req.app.db.collection(process.env.DB_COLLECTION_NAME_2).find({ triviaId: triviaToJoin }).toArray((error, result) => {
+    req.app.db.collection(process.env.DB_COLLECTION_NAME_2).find({
+      triviaId: triviaToJoin,
+      'players.name': playerName,
+      'players.uniqueId': playerUuid
+    }).toArray((error, result) => {
       if (error) {
         const error = new Error()
         error.statusCode = 400
         error.message = error
         next(error)
       } else if (result.length !== 1) {
-        const error = new Error()
-        error.statusCode = 400
-        error.message = 'Trivia not found, please try a different room code.'
-        next(error)
-      } else {
-        // const triviaData = JSON.stringify(result[0])
+        // insert player that was removed
         req.app.db.collection(process.env.DB_COLLECTION_NAME_2).updateOne({ triviaId: triviaToJoin },
           {
             $addToSet: {
               players: {
                 name: playerName,
-                uniqueId: playerUuid
+                uniqueId: playerUuid,
+                responses: []
               }
             }
           }, (error, result) => {
@@ -182,6 +207,9 @@ module.exports = {
               res.send('Ok')
             }
           })
+      } else {
+        // do not insert player because they already exist
+        res.send('ok')
       }
     })
   },
@@ -235,9 +263,6 @@ module.exports = {
   updateExistingTrivia: async (req, res, next) => {
     const roundToInsert = {}
     roundToInsert.type = req.body.type
-    if (req.body.theme) {
-      roundToInsert.theme = (req.body.theme !== '') ? req.body.theme.toLowerCase() : 'none'
-    }
     roundToInsert.pointValue = (Number.isInteger(req.body.pointValue)) ? req.body.pointValue : 1
     if (req.query.addRound === 'multipleChoice') {
       roundToInsert.questions = []
@@ -292,6 +317,7 @@ module.exports = {
     }
 
     if (req.query.addRound !== 'tieBreaker') {
+      roundToInsert.theme = (req.body.theme !== '') ? req.body.theme.toLowerCase() : 'none'
       req.app.db.collection(process.env.DB_COLLECTION_NAME).updateOne({ triviaId: req.params.triviaId },
         {
           $push: {
