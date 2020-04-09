@@ -356,6 +356,41 @@ function playerDisplayHostAction (data) {
     <p id="playerRecordedResponse">Your response:</p>
   `
   questionContainer.insertAdjacentHTML('beforeend', htmlToInsert)
+
+  // get player's current response
+  playerGetRecordedResponse(data, data.type)
+}
+
+function playerGetRecordedResponse (data, roundType) {
+  const xhttp = new XMLHttpRequest()
+  xhttp.onreadystatechange = function () {
+    if (this.readyState === 4 && this.status === 200) {
+      const playerResponse = (this.response !== 'Response not found.') ? JSON.parse(this.responseText) : false
+      console.log(playerResponse)
+      if (playerResponse) {
+        let displayResponse = ''
+        if (roundType === 'multipleChoice') {
+          console.log('ayyy')
+          if (playerResponse.response === 0) {
+            displayResponse = 'A'
+          } else if (playerResponse.response === 1) {
+            displayResponse = 'B'
+          } else if (playerResponse.response === 2) {
+            displayResponse = 'C'
+          } else if (playerResponse.response === 3) {
+            displayResponse = 'D'
+          }
+          console.log(displayResponse)
+        } else {
+          displayResponse = playerResponse.response
+        }
+        document.getElementById('playerRecordedResponse').innerHTML += ` ${displayResponse}`
+      }
+    }
+  }
+  xhttp.open('POST', '/getPlayerResponse', true)
+  xhttp.setRequestHeader('Content-type', 'application/json;charset=UTF-8')
+  xhttp.send(JSON.stringify({ triviaId: lobbyData.triviaId, name: playerName, uniqueId: window.localStorage.getItem('playerId'), roundNumber: data.roundNumber, questionNumber: data.questionNumber }))
 }
 
 function playerRecordResponse (roundNumber, roundType, questionNumber, response) {
