@@ -1,5 +1,8 @@
 /* global triviaData, lobbyData, playerName, io, fetch, XMLHttpRequest */
 
+// web socket
+const socket = io()
+
 // on page load
 document.addEventListener('DOMContentLoaded', () => {
   // update page title display
@@ -7,7 +10,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('infoTriviaId').innerHTML = lobbyData.triviaId
 
   // web socket
-  const socket = io()
   socket.heartbeatTimeout = 10000
 
   // socket to everyone that this player has joined
@@ -31,8 +33,16 @@ document.addEventListener('DOMContentLoaded', () => {
     getLobbyData()
   })
 
+  // when the host updates something
+  socket.on('host action', (data) => {
+    playerDisplayHostAction(data)
+  })
+
   // display content based on participant type (host or player)
   displayParticipantContent()
+
+  // to fix stupid standard js linting error
+  hostPerformAction('test')
 }, false)
 
 function getLobbyData () {
@@ -129,7 +139,7 @@ function hostDisplayRound (roundNumber) {
             </ul>
             <p>Answer: ${triviaData.rounds[roundNumber].questions[i].answer}</p>
           </div>
-          <div class="lobby__host__round-display__multiple__question__right" id="hostRound${roundNumber}Question${i}toggleDisplay">
+          <div class="lobby__host__round-display__multiple__question__right" id="hostRound${roundNumber}Question${i}ToggleDisplay" onClick="hostPerformAction(this)">
             Hidden
           </div>
         </div>
@@ -155,7 +165,7 @@ function hostDisplayRound (roundNumber) {
             <img src="${triviaData.rounds[roundNumber].pictures[i].url}" />
             <p>Answer: ${triviaData.rounds[roundNumber].pictures[i].answer}</p>
           </div>
-          <div class="lobby__host__round-display__picture__question__right" id="hostRound${roundNumber}Question${i}toggleDisplay">
+          <div class="lobby__host__round-display__picture__question__right" id="hostRound${roundNumber}Question${i}ToggleDisplay" onClick="hostPerformAction(this)">
             Hidden
           </div>
         </div>
@@ -180,7 +190,7 @@ function hostDisplayRound (roundNumber) {
             <p>${i + 1}) ${triviaData.rounds[roundNumber].questions[i].question}</p>
             <p>Answer: ${triviaData.rounds[roundNumber].questions[i].answer}</p>
           </div>
-          <div class="lobby__host__round-display__lightning__question__right" id="hostRound${roundNumber}Question${i}toggleDisplay">
+          <div class="lobby__host__round-display__lightning__question__right" id="hostRound${roundNumber}Question${i}ToggleDisplay" onClick="hostPerformAction(this)">
             Hidden
           </div>
         </div>
@@ -207,7 +217,7 @@ function hostDisplayTieBreaker () {
         <p>Q) ${triviaData.tieBreaker.question}</p>
         <p>A) ${triviaData.tieBreaker.answer}</p>
       </div>
-      <div class="lobby__host__tie-breaker-display__right">
+      <div class="lobby__host__tie-breaker-display__right" id="hostTieBreakerToggleDisplay" onClick="hostPerformAction(this)">
         Hidden
       </div>
     </div>
@@ -229,4 +239,75 @@ function hostDisplayRoundButton (event) {
     const round = parseInt(event.target.id.charAt(event.target.id.length - 1))
     hostDisplayRound(round)
   }
+}
+
+function hostPerformAction (element) {
+  const questionToSend = {}
+  if (element !== 'test' && element.id !== 'hostTieBreakerToggleDisplay') {
+    const roundNumber = parseInt(element.id.replace('hostRound', '').charAt(0))
+    const questionString = element.id.replace('ToggleDisplay', '')
+    const questionNumber = parseInt(questionString.charAt(questionString.length - 1))
+    questionToSend.roundNumber = roundNumber
+    questionToSend.questionNumber = questionNumber
+    questionToSend.type = triviaData.rounds[roundNumber].type
+    questionToSend.theme = triviaData.rounds[roundNumber].theme
+    questionToSend.pointValue = triviaData.rounds[roundNumber].pointValue
+    if (triviaData.rounds[roundNumber].type === 'multipleChoice') {
+      questionToSend.question = triviaData.rounds[roundNumber].questions[questionNumber].question
+      questionToSend.options = triviaData.rounds[roundNumber].questions[questionNumber].options
+    } else if (triviaData.rounds[roundNumber].type === 'picture') {
+      questionToSend.url = triviaData.rounds[roundNumber].pictures[questionNumber].url
+    } else if (triviaData.rounds[roundNumber].type === 'lightning') {
+      questionToSend.question = triviaData.rounds[roundNumber].questions[questionNumber].question
+    }
+  } if (element.id === 'hostTieBreakerToggleDisplay') {
+    questionToSend.type = 'tieBreaker'
+    questionToSend.question = triviaData.tieBreaker.question
+  }
+  if (Object.keys(questionToSend).length !== 0) {
+    socket.emit('host action', questionToSend)
+  }
+}
+
+function playerDisplayHostAction (data) {
+  // console.log(data)
+  const questionContainer = document.querySelector('.lobby__player__round-display')
+  questionContainer.innerHTML = ''
+  let htmlToInsert = ''
+  if (data.type !== 'tieBreaker') {
+    htmlToInsert += `
+      <p>Round ${data.roundNumber + 1}</p>
+      <p>Round Type: ${data.type}</p>
+      <p>Round Theme: ${data.theme}</p>
+      <p>Point Value: ${data.pointValue}</p>
+    `
+    if (data.type === 'multipleChoice') {
+      htmlToInsert += `
+      <p>Question ${data.questionNumber + 1}</p>
+      <p>${data.question}</p>
+      <ul>
+        <li>A) ${data.options[0]}</li>
+        <li>B) ${data.options[1]}</li>
+        <li>C) ${data.options[2]}</li>
+        <li>D) ${data.options[3]}</li>
+      </ul>
+      `
+    } else if (data.type === 'picture') {
+      htmlToInsert += `
+      <p>Picture ${data.questionNumber + 1}</p>
+      <img src="${data.url}" />
+      `
+    } else if (data.type === 'lightning') {
+      htmlToInsert += `
+      <p>Question ${data.questionNumber + 1}</p>
+      <p>${data.question}</p>
+      `
+    }
+  } else if (data.type === 'tieBreaker') {
+    htmlToInsert += `
+      <p>Tie Breaker Question</p>
+      <p>${data.question}</p>
+    `
+  }
+  questionContainer.insertAdjacentHTML('beforeend', htmlToInsert)
 }
