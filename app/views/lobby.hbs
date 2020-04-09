@@ -1,5 +1,6 @@
 <script>
   const triviaData = {{{triviaData}}}
+  const lobbyData = {{{lobbyData}}}
   const playerName = '{{playerName}}'
 </script>
 
@@ -10,5 +11,19 @@
 
 <p>People in lobby</p>
 <ul class="lobby__players"></ul>
+
+<div class="lobby__host">
+  <p>View only for hosts</p>
+  <div class="lobby__host__round-select">
+    <p>Select a round</p>
+  </div>
+  <div class="lobby__host__round-display"></div>
+</div>
+
+<div class="lobby__player">
+  <div class="lobby__player__waiting">
+    <p>Waiting for host to start.</p>
+  </div>
+</div>
 
 <script src="/socket.io/socket.io.js"></script>

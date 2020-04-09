@@ -1,3 +1,100 @@
+.lobby__host {
+  border: 1px solid red;
+  display: none;
+  margin: 10px auto;
+  width: 90%;
+}
+.lobby__host .lobby__host__round-select {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  text-align: center;
+}
+.lobby__host .lobby__host__round-select p {
+  width: 100%;
+}
+.lobby__host .lobby__host__round-select .lobby__host__round-select__round {
+  background-color: #333333;
+  border-radius: 5px;
+  box-sizing: border-box;
+  color: white;
+  cursor: pointer;
+  margin: 10px;
+  padding: 10px;
+  width: 33%;
+}
+.lobby__host .lobby__host__round-select .lobby__host__round-select__round--active {
+  background-color: green;
+}
+.lobby__host .lobby__host__round-display__multiple__question,
+.lobby__host .lobby__host__round-display__picture__question,
+.lobby__host .lobby__host__round-display__lightning__question,
+.lobby__host .lobby__host__tie-breaker-display {
+  align-items: stretch;
+  background-color: grey;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin: 10px 0;
+  width: 100%;
+}
+.lobby__host .lobby__host__round-display__multiple__question .lobby__host__round-display__multiple__question__left,
+.lobby__host .lobby__host__round-display__multiple__question .lobby__host__round-display__picture__question__left,
+.lobby__host .lobby__host__round-display__multiple__question .lobby__host__round-display__lightning__question__left,
+.lobby__host .lobby__host__round-display__multiple__question .lobby__host__tie-breaker-display__right,
+.lobby__host .lobby__host__round-display__picture__question .lobby__host__round-display__multiple__question__left,
+.lobby__host .lobby__host__round-display__picture__question .lobby__host__round-display__picture__question__left,
+.lobby__host .lobby__host__round-display__picture__question .lobby__host__round-display__lightning__question__left,
+.lobby__host .lobby__host__round-display__picture__question .lobby__host__tie-breaker-display__right,
+.lobby__host .lobby__host__round-display__lightning__question .lobby__host__round-display__multiple__question__left,
+.lobby__host .lobby__host__round-display__lightning__question .lobby__host__round-display__picture__question__left,
+.lobby__host .lobby__host__round-display__lightning__question .lobby__host__round-display__lightning__question__left,
+.lobby__host .lobby__host__round-display__lightning__question .lobby__host__tie-breaker-display__right,
+.lobby__host .lobby__host__tie-breaker-display .lobby__host__round-display__multiple__question__left,
+.lobby__host .lobby__host__tie-breaker-display .lobby__host__round-display__picture__question__left,
+.lobby__host .lobby__host__tie-breaker-display .lobby__host__round-display__lightning__question__left,
+.lobby__host .lobby__host__tie-breaker-display .lobby__host__tie-breaker-display__right {
+  width: 75%;
+}
+.lobby__host .lobby__host__round-display__multiple__question .lobby__host__round-display__multiple__question__right,
+.lobby__host .lobby__host__round-display__multiple__question .lobby__host__round-display__picture__question__right,
+.lobby__host .lobby__host__round-display__multiple__question .lobby__host__round-display__lightning__question__right,
+.lobby__host .lobby__host__round-display__multiple__question .lobby__host__tie-breaker-display__right,
+.lobby__host .lobby__host__round-display__picture__question .lobby__host__round-display__multiple__question__right,
+.lobby__host .lobby__host__round-display__picture__question .lobby__host__round-display__picture__question__right,
+.lobby__host .lobby__host__round-display__picture__question .lobby__host__round-display__lightning__question__right,
+.lobby__host .lobby__host__round-display__picture__question .lobby__host__tie-breaker-display__right,
+.lobby__host .lobby__host__round-display__lightning__question .lobby__host__round-display__multiple__question__right,
+.lobby__host .lobby__host__round-display__lightning__question .lobby__host__round-display__picture__question__right,
+.lobby__host .lobby__host__round-display__lightning__question .lobby__host__round-display__lightning__question__right,
+.lobby__host .lobby__host__round-display__lightning__question .lobby__host__tie-breaker-display__right,
+.lobby__host .lobby__host__tie-breaker-display .lobby__host__round-display__multiple__question__right,
+.lobby__host .lobby__host__tie-breaker-display .lobby__host__round-display__picture__question__right,
+.lobby__host .lobby__host__tie-breaker-display .lobby__host__round-display__lightning__question__right,
+.lobby__host .lobby__host__tie-breaker-display .lobby__host__tie-breaker-display__right {
+  align-items: center;
+  background-color: #333333;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  width: 25%;
+}
 
+.lobby__player {
+  border: 1px solid orange;
+  display: none;
+  margin: 10px auto;
+  width: 90%;
+}
+.lobby__player .lobby__player__waiting {
+  display: none;
+}
+.lobby__player .lobby__player__question {
+  display: none;
+}
 
 /*# sourceMappingURL=lobby.css.map */
