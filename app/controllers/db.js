@@ -84,7 +84,8 @@ module.exports = {
               createdAt: new Date().toISOString(),
               triviaId: currentTriviaId.toLowerCase(),
               host: req.body['host-index-name'].toLowerCase(),
-              players: []
+              players: [],
+              responses: []
             }
             req.app.db.collection(process.env.DB_COLLECTION_NAME_2).insertOne(lobbyToInsert, (error, result) => {
               if (error) {
@@ -122,8 +123,7 @@ module.exports = {
               $addToSet: {
                 players: {
                   name: playerName,
-                  uniqueId: playerUuid,
-                  responses: []
+                  uniqueId: playerUuid
                 }
               }
             }, (error, result) => {
@@ -193,8 +193,7 @@ module.exports = {
             $addToSet: {
               players: {
                 name: playerName,
-                uniqueId: playerUuid,
-                responses: []
+                uniqueId: playerUuid
               }
             }
           }, (error, result) => {
@@ -259,6 +258,9 @@ module.exports = {
             })
         }
       })
+  },
+  savePlayerResponse: async (req, res, next) => {
+    res.send('ok')
   },
   updateExistingTrivia: async (req, res, next) => {
     const roundToInsert = {}

@@ -124,12 +124,12 @@ function hostDisplayRound (roundNumber) {
     <p>Theme: ${triviaData.rounds[roundNumber].theme}</p>
     <p>Point Value: ${triviaData.rounds[roundNumber].pointValue}</p>
     <p>Select a question to show the players.</p>
-    <div class="lobby__host__round-display__multiple">
+    <div class="lobby__host__round-display__questions">
     `
     for (let i = 0; i < triviaData.rounds[roundNumber].questions.length; i++) {
       htmlToInsert += `
-        <div class="lobby__host__round-display__multiple__question">
-          <div class="lobby__host__round-display__multiple__question__left">
+        <div class="lobby__host__round-display__questions__question">
+          <div class="lobby__host__round-display__questions__question__left">
             <p>${i + 1}) ${triviaData.rounds[roundNumber].questions[i].question}</p>
             <ul>
               <li>A) ${triviaData.rounds[roundNumber].questions[i].options[0]}</li>
@@ -139,7 +139,7 @@ function hostDisplayRound (roundNumber) {
             </ul>
             <p>Answer: ${triviaData.rounds[roundNumber].questions[i].answer}</p>
           </div>
-          <div class="lobby__host__round-display__multiple__question__right" id="hostRound${roundNumber}Question${i}ToggleDisplay" onClick="hostPerformAction(this)">
+          <div class="lobby__host__round-display__questions__question__right" id="hostRound${roundNumber}Question${i}ToggleDisplay" onClick="hostPerformAction(this)">
             Hidden
           </div>
         </div>
@@ -155,17 +155,17 @@ function hostDisplayRound (roundNumber) {
     <p>Theme: ${triviaData.rounds[roundNumber].theme}</p>
     <p>Point Value: ${triviaData.rounds[roundNumber].pointValue}</p>
     <p>Select a picture to show the players.</p>
-    <div class="lobby__host__round-display__picture">
+    <div class="lobby__host__round-display__questions">
     `
     for (let i = 0; i < triviaData.rounds[roundNumber].pictures.length; i++) {
       htmlToInsert += `
-        <div class="lobby__host__round-display__picture__question">
-          <div class="lobby__host__round-display__picture__question__left">
+        <div class="lobby__host__round-display__questions__question">
+          <div class="lobby__host__round-display__questions__question__left">
             <p>${i + 1})</p>
             <img src="${triviaData.rounds[roundNumber].pictures[i].url}" />
             <p>Answer: ${triviaData.rounds[roundNumber].pictures[i].answer}</p>
           </div>
-          <div class="lobby__host__round-display__picture__question__right" id="hostRound${roundNumber}Question${i}ToggleDisplay" onClick="hostPerformAction(this)">
+          <div class="lobby__host__round-display__questions__question__right" id="hostRound${roundNumber}Question${i}ToggleDisplay" onClick="hostPerformAction(this)">
             Hidden
           </div>
         </div>
@@ -181,18 +181,16 @@ function hostDisplayRound (roundNumber) {
     <p>Theme: ${triviaData.rounds[roundNumber].theme}</p>
     <p>Point Value: ${triviaData.rounds[roundNumber].pointValue}</p>
     <p>Select a question to show the players.</p>
-    <div class="lobby__host__round-display__lightning">
+    <div class="lobby__host__round-display__questions">
     `
     for (let i = 0; i < triviaData.rounds[roundNumber].questions.length; i++) {
       htmlToInsert += `
-        <div class="lobby__host__round-display__lightning__question">
-          <div class="lobby__host__round-display__lightning__question__left">
+        <div class="lobby__host__round-display__questions__question">
+          <div class="lobby__host__round-display__questions__question__left">
             <p>${i + 1}) ${triviaData.rounds[roundNumber].questions[i].question}</p>
             <p>Answer: ${triviaData.rounds[roundNumber].questions[i].answer}</p>
           </div>
-          <div class="lobby__host__round-display__lightning__question__right" id="hostRound${roundNumber}Question${i}ToggleDisplay" onClick="hostPerformAction(this)">
-            Hidden
-          </div>
+          <div class="lobby__host__round-display__questions__question__right" id="hostRound${roundNumber}Question${i}ToggleDisplay" onClick="hostPerformAction(this)">Hidden</div>
         </div>
       `
     }
@@ -212,12 +210,12 @@ function hostDisplayTieBreaker () {
   roundContainer.innerHTML = ''
   const htmlToInsert = `
     <p>Tie Breaker</p>
-    <div class="lobby__host__tie-breaker-display">
-      <div class="lobby__host__tie-breaker-display__left">
+    <div class="lobby__host__round-display__questions__question">
+      <div class="lobby__host__round-display__questions__question__left">
         <p>Q) ${triviaData.tieBreaker.question}</p>
         <p>A) ${triviaData.tieBreaker.answer}</p>
       </div>
-      <div class="lobby__host__tie-breaker-display__right" id="hostTieBreakerToggleDisplay" onClick="hostPerformAction(this)">
+      <div class="lobby__host__round-display__questions__question__right" id="hostTieBreakerToggleDisplay" onClick="hostPerformAction(this)">
         Hidden
       </div>
     </div>
@@ -244,6 +242,14 @@ function hostDisplayRoundButton (event) {
 function hostPerformAction (element) {
   const questionToSend = {}
   if (element !== 'test' && element.id !== 'hostTieBreakerToggleDisplay') {
+    // update host display
+    document.querySelectorAll('.lobby__host__round-display__questions__question__right').forEach((element) => {
+      element.innerHTML = 'Hidden'
+      element.classList.remove('active')
+    })
+    element.classList.add('active')
+    element.innerHTML = 'Showing for players'
+    // compile question data to send to players
     const roundNumber = parseInt(element.id.replace('hostRound', '').charAt(0))
     const questionString = element.id.replace('ToggleDisplay', '')
     const questionNumber = parseInt(questionString.charAt(questionString.length - 1))
@@ -285,29 +291,60 @@ function playerDisplayHostAction (data) {
       htmlToInsert += `
       <p>Question ${data.questionNumber + 1}</p>
       <p>${data.question}</p>
-      <ul>
-        <li>A) ${data.options[0]}</li>
-        <li>B) ${data.options[1]}</li>
-        <li>C) ${data.options[2]}</li>
-        <li>D) ${data.options[3]}</li>
+      <ul class="lobby__player__round-display__multiple__options">
+        <li onClick="playerRecordResponse(${data.roundNumber}, '${data.type}', ${data.questionNumber}, 0)">A) ${data.options[0]}</li>
+        <li onClick="playerRecordResponse(${data.roundNumber}, '${data.type}', ${data.questionNumber}, 1)">B) ${data.options[1]}</li>
+        <li onClick="playerRecordResponse(${data.roundNumber}, '${data.type}', ${data.questionNumber}, 2)">C) ${data.options[2]}</li>
+        <li onClick="playerRecordResponse(${data.roundNumber}, '${data.type}', ${data.questionNumber}, 3)">D) ${data.options[3]}</li>
       </ul>
       `
     } else if (data.type === 'picture') {
       htmlToInsert += `
       <p>Picture ${data.questionNumber + 1}</p>
       <img src="${data.url}" />
+      <input id="playerPictureResponse" type="text" />
+      <button onClick="playerRecordResponse(${data.roundNumber}, '${data.type}', ${data.questionNumber}, 'playerPictureResponse')">Submit response</button>
       `
     } else if (data.type === 'lightning') {
       htmlToInsert += `
       <p>Question ${data.questionNumber + 1}</p>
       <p>${data.question}</p>
+      <input id="playerLightningResponse" type="text" />
+      <button onClick="playerRecordResponse(${data.roundNumber}, '${data.type}', ${data.questionNumber}, 'playerLightningResponse')">Submit response</button>
       `
     }
   } else if (data.type === 'tieBreaker') {
     htmlToInsert += `
       <p>Tie Breaker Question</p>
       <p>${data.question}</p>
+      <input id="playerTieBreakerResponse" type="text" />
+      <button onClick="playerRecordResponse(${data.roundNumber}, '${data.type}', ${data.questionNumber}, 'playerTieBreakerResponse')">Submit response</button>
     `
   }
+  htmlToInsert += `
+    <p id="playerRecordedResponse">Your response:</p>
+  `
   questionContainer.insertAdjacentHTML('beforeend', htmlToInsert)
+}
+
+function playerRecordResponse (roundNumber, roundType, questionNumber, response) {
+  // local response display
+  const responseLocation = document.getElementById('playerRecordedResponse')
+  if (roundType === 'multipleChoice') {
+    if (response === 0) {
+      response = 'A'
+    } else if (response === 1) {
+      response = 'B'
+    } else if (response === 2) {
+      response = 'C'
+    } else if (response === 3) {
+      response = 'D'
+    }
+    responseLocation.innerHTML = `Your response: ${response}`
+  } else if (roundType === 'picture' || roundType === 'lightning' || roundType === 'tieBreaker') {
+    const playerResponse = document.getElementById(response).value
+    if (playerResponse.length > 0) {
+      responseLocation.innerHTML = `Your response: ${playerResponse}`
+    }
+  }
 }
