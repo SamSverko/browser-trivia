@@ -38,6 +38,7 @@
   box-sizing: border-box;
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   justify-content: space-between;
   margin: 10px 0;
   width: 100%;
@@ -54,6 +55,10 @@
   justify-content: center;
   text-align: center;
   width: 25%;
+}
+.lobby__host .lobby__host__round-display__questions__question .lobby__host__round-display__questions__question__player-responses {
+  text-align: center;
+  width: 100%;
 }
 
 .lobby__player {

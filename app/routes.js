@@ -201,6 +201,25 @@ router.post('/getPlayerResponse', [
   DbController.getPlayerQuestionResponse(req, res, next)
 })
 
+router.post('/getAllResponsesForQuestion', [
+  body('triviaId').isString().notEmpty().trim().escape().isLength(4),
+  body('roundNumber').isInt().notEmpty(),
+  body('questionNumber').isInt().notEmpty()
+], (req, res, next) => {
+  console.log(`${req.method} request for ${req.url}.`)
+
+  // return any errors
+  const validationErrors = validationResult(req)
+  if (!validationErrors.isEmpty()) {
+    const error = new Error()
+    error.statusCode = 422
+    error.message = `Form validation failed:<br /><pre><code>${JSON.stringify(validationErrors.array(), undefined, 2)}</code></pre>`
+    return next(error)
+  }
+
+  DbController.getAllResponsesForQuestion(req, res, next)
+})
+
 // server error handler test page
 router.get('/error', (req, res, next) => {
   const error = new Error()

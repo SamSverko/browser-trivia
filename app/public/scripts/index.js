@@ -19,14 +19,12 @@ function generateUUID () {
   })
 }
 
-function handleQueryParams () {
+function handleQueryParams (test) {
   const urlParams = new URLSearchParams(window.location.search)
 
   const doesTriviaExist = urlParams.get('triviaNotFound')
   if (doesTriviaExist) {
     console.log('TRIVIA NOT FOUND!')
-  } else {
-    console.log('TRIVIA FOUND!')
   }
 
   const isLobbyReady = urlParams.get('lobbyNotReady')

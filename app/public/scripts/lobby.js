@@ -48,11 +48,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function getLobbyData () {
   (async () => {
-    fetch(`http://localhost:3000/lobby/${lobbyData.triviaId}`)
+    fetch(`${window.location.origin}/lobby/${lobbyData.triviaId}`)
       .then((response) => {
         if (response.ok) { return response.json() }
         return Promise.reject(response)
       }).then((data) => {
+        lobbyData = data
         displayLobbyData(data)
       }).catch((error) => {
         console.warn('Something went wrong.', error)
@@ -169,6 +170,10 @@ function hostDisplayRound (roundNumber) {
           </div>
           <div class="lobby__host__round-display__questions__question__right" id="hostRound${roundNumber}Question${i}ToggleDisplay" onClick="hostPerformAction(this)">
             Hidden
+          </div>
+          <div class="lobby__host__round-display__questions__question__player-responses">
+            <p>Players left to respond:</p>
+            <p id="hostPlayersYetToResponseRound${roundNumber}Question${i}"></p>
           </div>
         </div>
       `
@@ -305,6 +310,13 @@ function hostPerformAction (element) {
   if (Object.keys(questionToSend).length !== 0) {
     socket.emit('host action', questionToSend)
   }
+  // update display of players yet to respond
+  if (element !== 'test') {
+    const roundNumber = parseInt(element.id.replace('hostRound', '').charAt(0))
+    const questionString = element.id.replace('ToggleDisplay', '')
+    const questionNumber = parseInt(questionString.charAt(questionString.length - 1))
+    hostGetAllResponsesForQuestion(roundNumber, questionNumber)
+  }
 }
 
 function playerDisplayHostAction (data) {
@@ -366,11 +378,9 @@ function playerGetRecordedResponse (data, roundType) {
   xhttp.onreadystatechange = function () {
     if (this.readyState === 4 && this.status === 200) {
       const playerResponse = (this.response !== 'Response not found.') ? JSON.parse(this.responseText) : false
-      console.log(playerResponse)
       if (playerResponse) {
         let displayResponse = ''
         if (roundType === 'multipleChoice') {
-          console.log('ayyy')
           if (playerResponse.response === 0) {
             displayResponse = 'A'
           } else if (playerResponse.response === 1) {
@@ -380,7 +390,6 @@ function playerGetRecordedResponse (data, roundType) {
           } else if (playerResponse.response === 3) {
             displayResponse = 'D'
           }
-          console.log(displayResponse)
         } else {
           displayResponse = playerResponse.response
         }
@@ -419,4 +428,36 @@ function playerRecordResponse (roundNumber, roundType, questionNumber, response)
       playerPostResponseToDb(roundNumber, roundType, questionNumber, playerResponse)
     }
   }
+}
+
+function hostGetAllResponsesForQuestion (roundNumber, questionNumber) {
+  const xhttp = new XMLHttpRequest()
+  xhttp.onreadystatechange = function () {
+    if (this.readyState === 4 && this.status === 200) {
+      const questionResponses = JSON.parse(this.responseText)
+      const playersToRespondDisplay = document.getElementById(`hostPlayersYetToResponseRound${roundNumber}Question${questionNumber}`)
+      if (Array.isArray(questionResponses)) {
+        const playersWhoAnswered = []
+        questionResponses.forEach((response) => {
+          playersWhoAnswered.push({ name: response.name, uniqueId: response.uniqueId })
+        })
+        const playersLeft = lobbyData.players.filter(user => {
+          return questionResponses.findIndex(owner => (owner.name === user.name && owner.uniqueId === user.uniqueId)) === -1
+        })
+        let stringOfPlayers = ''
+        playersLeft.forEach((player) => {
+          stringOfPlayers += `${player.name}, `
+        })
+        const fixedStringOfPlayers = stringOfPlayers.slice(0, -2)
+        if (fixedStringOfPlayers.length > 0) {
+          playersToRespondDisplay.innerHTML = fixedStringOfPlayers
+        } else {
+          playersToRespondDisplay.innerHTML = 'all players have responded'
+        }
+      }
+    }
+  }
+  xhttp.open('POST', '/getAllResponsesForQuestion', true)
+  xhttp.setRequestHeader('Content-type', 'application/json;charset=UTF-8')
+  xhttp.send(JSON.stringify({ triviaId: lobbyData.triviaId, roundNumber: roundNumber, questionNumber: questionNumber }))
 }

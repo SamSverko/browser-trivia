@@ -24,6 +24,26 @@ module.exports = {
       }
     })
   },
+  getAllResponsesForQuestion: async (req, res, next) => {
+    req.app.db.collection(process.env.DB_COLLECTION_NAME_2).find({ triviaId: req.body.triviaId }).toArray((error, result) => {
+      if (error) {
+        const error = new Error()
+        error.statusCode = 400
+        error.message = error
+        next(error)
+      } else if (result.length !== 1) {
+        res.send('Responses not found')
+      } else {
+        const filteredQuestions = []
+        result[0].responses.forEach((response) => {
+          if (response.roundNumber === req.body.roundNumber && response.questionNumber === req.body.questionNumber) {
+            filteredQuestions.push(response)
+          }
+        })
+        res.send(filteredQuestions)
+      }
+    })
+  },
   getLobbyData: async (req, res, next) => {
     req.app.db.collection(process.env.DB_COLLECTION_NAME_2).find({ triviaId: req.params.triviaId }).toArray((error, result) => {
       if (error) {
