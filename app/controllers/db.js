@@ -66,28 +66,53 @@ module.exports = {
     })
   },
   getPlayerQuestionResponse: async (req, res, next) => {
-    req.app.db.collection(process.env.DB_COLLECTION_NAME_2).find({
-      triviaId: req.body.triviaId,
-      'responses.name': req.body.name.toLowerCase(),
-      'responses.uniqueId': req.body.uniqueId.toLowerCase(),
-      'responses.roundNumber': req.body.roundNumber,
-      'responses.questionNumber': req.body.questionNumber
-    }).toArray((error, result) => {
-      if (error) {
-        const error = new Error()
-        error.statusCode = 400
-        error.message = error
-        next(error)
-      } else if (result.length !== 1) {
-        res.send('Response not found.')
-      } else {
-        result[0].responses.forEach((response) => {
-          if (response.name === req.body.name && response.uniqueId === req.body.uniqueId && response.roundNumber === req.body.roundNumber && response.questionNumber === req.body.questionNumber) {
-            res.send({ response: response.response })
-          }
-        })
-      }
-    })
+    if (req.body.roundType === 'tieBreaker') {
+      req.app.db.collection(process.env.DB_COLLECTION_NAME_2).find({
+        triviaId: req.body.triviaId,
+        'responses.name': req.body.name.toLowerCase(),
+        'responses.uniqueId': req.body.uniqueId.toLowerCase(),
+        'responses.roundType': req.body.roundType
+      }).toArray((error, result) => {
+        if (error) {
+          const error = new Error()
+          error.statusCode = 400
+          error.message = error
+          next(error)
+        } else if (result.length !== 1) {
+          res.send('Response not found.')
+        } else {
+          result[0].responses.forEach((response) => {
+            if (response.name === req.body.name && response.uniqueId === req.body.uniqueId && response.roundType === req.body.roundType) {
+              console.log(response.response)
+              res.send({ response: response.response })
+            }
+          })
+        }
+      })
+    } else {
+      req.app.db.collection(process.env.DB_COLLECTION_NAME_2).find({
+        triviaId: req.body.triviaId,
+        'responses.name': req.body.name.toLowerCase(),
+        'responses.uniqueId': req.body.uniqueId.toLowerCase(),
+        'responses.roundNumber': req.body.roundNumber,
+        'responses.questionNumber': req.body.questionNumber
+      }).toArray((error, result) => {
+        if (error) {
+          const error = new Error()
+          error.statusCode = 400
+          error.message = error
+          next(error)
+        } else if (result.length !== 1) {
+          res.send('Response not found.')
+        } else {
+          result[0].responses.forEach((response) => {
+            if (response.name === req.body.name && response.uniqueId === req.body.uniqueId && response.roundNumber === req.body.roundNumber && response.questionNumber === req.body.questionNumber) {
+              res.send({ response: response.response })
+            }
+          })
+        }
+      })
+    }
   },
   insertNewTrivia: async (req, res, next) => {
     // retrieve all existing triviaIds

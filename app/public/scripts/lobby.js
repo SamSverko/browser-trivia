@@ -308,6 +308,7 @@ function hostPerformAction (element) {
 }
 
 function playerDisplayHostAction (data) {
+  console.log('playerRecordedResponse()')
   const questionContainer = document.querySelector('.lobby__player__round-display')
   questionContainer.innerHTML = ''
   let htmlToInsert = ''
@@ -358,11 +359,7 @@ function playerDisplayHostAction (data) {
   questionContainer.insertAdjacentHTML('beforeend', htmlToInsert)
 
   // get player's current response
-  if (data.type === 'tieBreaker') {
-    console.log('POST FOR TIE')
-  } else {
-    playerGetRecordedResponse(data, data.type)
-  }
+  playerGetRecordedResponse(data, data.type)
 }
 
 function playerGetRecordedResponse (data, roundType) {
@@ -390,9 +387,15 @@ function playerGetRecordedResponse (data, roundType) {
       }
     }
   }
-  xhttp.open('POST', '/getPlayerResponse', true)
-  xhttp.setRequestHeader('Content-type', 'application/json;charset=UTF-8')
-  xhttp.send(JSON.stringify({ triviaId: lobbyData.triviaId, name: playerName, uniqueId: window.localStorage.getItem('playerId'), roundNumber: data.roundNumber, questionNumber: data.questionNumber }))
+  if (roundType === 'tieBreaker') {
+    xhttp.open('POST', '/getPlayerResponse', true)
+    xhttp.setRequestHeader('Content-type', 'application/json;charset=UTF-8')
+    xhttp.send(JSON.stringify({ triviaId: lobbyData.triviaId, name: playerName, uniqueId: window.localStorage.getItem('playerId'), roundType: roundType }))
+  } else {
+    xhttp.open('POST', '/getPlayerResponse', true)
+    xhttp.setRequestHeader('Content-type', 'application/json;charset=UTF-8')
+    xhttp.send(JSON.stringify({ triviaId: lobbyData.triviaId, name: playerName, uniqueId: window.localStorage.getItem('playerId'), roundNumber: data.roundNumber, questionNumber: data.questionNumber }))
+  }
 }
 
 function playerPostResponseToDb (roundNumber, roundType, questionNumber, response) {
@@ -400,7 +403,7 @@ function playerPostResponseToDb (roundNumber, roundType, questionNumber, respons
     player: {
       name: playerName,
       triviaId: lobbyData.triviaId,
-      uniqueId: window.localStorage.getItem('playerId'),
+      uniqueId: window.localStorage.getItem('playerId')
     },
     response: {
       roundType: roundType,
@@ -481,11 +484,13 @@ function hostGetAllResponsesForQuestion (roundType, roundNumber, questionNumber)
       }
     }
   }
-  xhttp.open('POST', '/getAllResponsesForQuestion', true)
-  xhttp.setRequestHeader('Content-type', 'application/json;charset=UTF-8')
   if (roundType === 'tieBreaker') {
+    xhttp.open('POST', '/getAllResponsesForQuestion', true)
+    xhttp.setRequestHeader('Content-type', 'application/json;charset=UTF-8')
     xhttp.send(JSON.stringify({ triviaId: lobbyData.triviaId, roundType: roundType }))
   } else {
+    xhttp.open('POST', '/getAllResponsesForQuestion', true)
+    xhttp.setRequestHeader('Content-type', 'application/json;charset=UTF-8')
     xhttp.send(JSON.stringify({ triviaId: lobbyData.triviaId, roundNumber: roundNumber, questionNumber: questionNumber }))
   }
 }
