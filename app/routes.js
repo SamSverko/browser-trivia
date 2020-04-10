@@ -203,8 +203,8 @@ router.post('/getPlayerResponse', [
 
 router.post('/getAllResponsesForQuestion', [
   body('triviaId').isString().notEmpty().trim().escape().isLength(4),
-  body('roundNumber').isInt().notEmpty(),
-  body('questionNumber').isInt().notEmpty()
+  body('roundNumber').isInt().notEmpty().optional(),
+  body('questionNumber').isInt().notEmpty().optional()
 ], (req, res, next) => {
   console.log(`${req.method} request for ${req.url}.`)
 

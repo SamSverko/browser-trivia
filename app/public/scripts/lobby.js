@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
   socket.emit('played joined', playerName, playerId)
 
   // post user to db in case user disconnected properly, but was not added back to the lobby db
-  postPlayerToDb(playerName, playerId)
+  participantPostToDb(playerName, playerId)
 
   // when a player joins the lobby
   socket.on('player joined', (playerName, playerId) => {
@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
   })
 
   // display content based on participant type (host or player)
-  displayParticipantContent()
+  participantDisplayContent()
 
   // to fix stupid standard js linting error
   hostPerformAction('test')
@@ -73,46 +73,7 @@ function displayLobbyData (lobbyData) {
   lobbyList.insertAdjacentHTML('beforeend', htmlToInsert)
 }
 
-function postPlayerToDb (name, uniqueId) {
-  const xhttp = new XMLHttpRequest()
-  xhttp.onreadystatechange = function () {
-    if (this.readyState === 4 && this.status === 200) {
-      getLobbyData()
-    }
-  }
-  xhttp.open('POST', '/lobby/addPlayer', true)
-  xhttp.setRequestHeader('Content-type', 'application/json;charset=UTF-8')
-  xhttp.send(JSON.stringify({ name: name, uniqueId: uniqueId, triviaId: lobbyData.triviaId }))
-}
-
-function playerPostResponseToDb (roundNumber, roundType, questionNumber, response) {
-  const dataToSend = {
-    player: {
-      name: playerName,
-      triviaId: lobbyData.triviaId,
-      uniqueId: window.localStorage.getItem('playerId')
-    },
-    response: {
-      roundNumber: roundNumber,
-      roundType: roundType,
-      questionNumber: questionNumber,
-      response: response
-    }
-  }
-
-  const xhttp = new XMLHttpRequest()
-  xhttp.onreadystatechange = function () {
-    if (this.readyState === 4 && this.status === 200) {
-      const responseData = JSON.parse(this.responseText)
-      console.log(responseData)
-    }
-  }
-  xhttp.open('POST', '/lobby/recordPlayerResponse', true)
-  xhttp.setRequestHeader('Content-type', 'application/json;charset=UTF-8')
-  xhttp.send(JSON.stringify(dataToSend))
-}
-
-function displayParticipantContent () {
+function participantDisplayContent () {
   console.log(triviaData)
   // console.log(lobbyData)
   if (triviaData) {
@@ -140,6 +101,18 @@ function displayParticipantContent () {
     document.querySelector('.lobby__player').style.display = 'block'
     document.querySelector('.lobby__player__waiting').style.display = 'block'
   }
+}
+
+function participantPostToDb (name, uniqueId) {
+  const xhttp = new XMLHttpRequest()
+  xhttp.onreadystatechange = function () {
+    if (this.readyState === 4 && this.status === 200) {
+      getLobbyData()
+    }
+  }
+  xhttp.open('POST', '/lobby/addPlayer', true)
+  xhttp.setRequestHeader('Content-type', 'application/json;charset=UTF-8')
+  xhttp.send(JSON.stringify({ name: name, uniqueId: uniqueId, triviaId: lobbyData.triviaId }))
 }
 
 function hostDisplayRound (roundNumber) {
@@ -201,6 +174,10 @@ function hostDisplayRound (roundNumber) {
           <div class="lobby__host__round-display__questions__question__right" id="hostRound${roundNumber}Question${i}ToggleDisplay" onClick="hostPerformAction(this)">
             Hidden
           </div>
+          <div class="lobby__host__round-display__questions__question__player-responses">
+            <p>Players left to respond:</p>
+            <p id="hostPlayersYetToResponseRound${roundNumber}Question${i}"></p>
+          </div>
         </div>
       `
     }
@@ -223,7 +200,13 @@ function hostDisplayRound (roundNumber) {
             <p>${i + 1}) ${triviaData.rounds[roundNumber].questions[i].question}</p>
             <p>Answer: ${triviaData.rounds[roundNumber].questions[i].answer}</p>
           </div>
-          <div class="lobby__host__round-display__questions__question__right" id="hostRound${roundNumber}Question${i}ToggleDisplay" onClick="hostPerformAction(this)">Hidden</div>
+          <div class="lobby__host__round-display__questions__question__right" id="hostRound${roundNumber}Question${i}ToggleDisplay" onClick="hostPerformAction(this)">
+            Hidden
+          </div>
+          <div class="lobby__host__round-display__questions__question__player-responses">
+            <p>Players left to respond:</p>
+            <p id="hostPlayersYetToResponseRound${roundNumber}Question${i}"></p>
+          </div>
         </div>
       `
     }
@@ -251,6 +234,10 @@ function hostDisplayTieBreaker () {
       <div class="lobby__host__round-display__questions__question__right" id="hostTieBreakerToggleDisplay" onClick="hostPerformAction(this)">
         Hidden
       </div>
+      <div class="lobby__host__round-display__questions__question__player-responses">
+        <p>Players left to respond:</p>
+        <p id="hostPlayersYetToResponseRoundTieBreaker"></p>
+      </div>
     </div>
   `
   roundContainer.insertAdjacentHTML('beforeend', htmlToInsert)
@@ -273,6 +260,7 @@ function hostDisplayRoundButton (event) {
 }
 
 function hostPerformAction (element) {
+  console.log('hostPerformAction()')
   const questionToSend = {}
   if (element !== 'test' && element.id !== 'hostTieBreakerToggleDisplay') {
     // update host display
@@ -315,7 +303,7 @@ function hostPerformAction (element) {
     const roundNumber = parseInt(element.id.replace('hostRound', '').charAt(0))
     const questionString = element.id.replace('ToggleDisplay', '')
     const questionNumber = parseInt(questionString.charAt(questionString.length - 1))
-    hostGetAllResponsesForQuestion(roundNumber, questionNumber)
+    hostGetAllResponsesForQuestion(questionToSend.type, roundNumber, questionNumber)
   }
 }
 
@@ -370,10 +358,15 @@ function playerDisplayHostAction (data) {
   questionContainer.insertAdjacentHTML('beforeend', htmlToInsert)
 
   // get player's current response
-  playerGetRecordedResponse(data, data.type)
+  if (data.type === 'tieBreaker') {
+    console.log('POST FOR TIE')
+  } else {
+    playerGetRecordedResponse(data, data.type)
+  }
 }
 
 function playerGetRecordedResponse (data, roundType) {
+  console.log('playerGetRecordedResponse()')
   const xhttp = new XMLHttpRequest()
   xhttp.onreadystatechange = function () {
     if (this.readyState === 4 && this.status === 200) {
@@ -400,6 +393,36 @@ function playerGetRecordedResponse (data, roundType) {
   xhttp.open('POST', '/getPlayerResponse', true)
   xhttp.setRequestHeader('Content-type', 'application/json;charset=UTF-8')
   xhttp.send(JSON.stringify({ triviaId: lobbyData.triviaId, name: playerName, uniqueId: window.localStorage.getItem('playerId'), roundNumber: data.roundNumber, questionNumber: data.questionNumber }))
+}
+
+function playerPostResponseToDb (roundNumber, roundType, questionNumber, response) {
+  const dataToSend = {
+    player: {
+      name: playerName,
+      triviaId: lobbyData.triviaId,
+      uniqueId: window.localStorage.getItem('playerId'),
+    },
+    response: {
+      roundType: roundType,
+      response: response
+    }
+  }
+  if (roundType !== 'tieBreaker') {
+    dataToSend.response.roundNumber = roundNumber
+    dataToSend.response.questionNumber = questionNumber
+    dataToSend.response.roundNumber = roundNumber
+  }
+
+  const xhttp = new XMLHttpRequest()
+  xhttp.onreadystatechange = function () {
+    if (this.readyState === 4 && this.status === 200) {
+      const responseData = JSON.parse(this.responseText)
+      console.log(responseData)
+    }
+  }
+  xhttp.open('POST', '/lobby/recordPlayerResponse', true)
+  xhttp.setRequestHeader('Content-type', 'application/json;charset=UTF-8')
+  xhttp.send(JSON.stringify(dataToSend))
 }
 
 function playerRecordResponse (roundNumber, roundType, questionNumber, response) {
@@ -430,12 +453,13 @@ function playerRecordResponse (roundNumber, roundType, questionNumber, response)
   }
 }
 
-function hostGetAllResponsesForQuestion (roundNumber, questionNumber) {
+function hostGetAllResponsesForQuestion (roundType, roundNumber, questionNumber) {
+  console.log('hostGetAllResponsesForQuestion()')
   const xhttp = new XMLHttpRequest()
   xhttp.onreadystatechange = function () {
     if (this.readyState === 4 && this.status === 200) {
       const questionResponses = JSON.parse(this.responseText)
-      const playersToRespondDisplay = document.getElementById(`hostPlayersYetToResponseRound${roundNumber}Question${questionNumber}`)
+      const playersToRespondDisplay = (roundType === 'tieBreaker') ? document.getElementById('hostPlayersYetToResponseRoundTieBreaker') : document.getElementById(`hostPlayersYetToResponseRound${roundNumber}Question${questionNumber}`)
       if (Array.isArray(questionResponses)) {
         const playersWhoAnswered = []
         questionResponses.forEach((response) => {
@@ -459,5 +483,9 @@ function hostGetAllResponsesForQuestion (roundNumber, questionNumber) {
   }
   xhttp.open('POST', '/getAllResponsesForQuestion', true)
   xhttp.setRequestHeader('Content-type', 'application/json;charset=UTF-8')
-  xhttp.send(JSON.stringify({ triviaId: lobbyData.triviaId, roundNumber: roundNumber, questionNumber: questionNumber }))
+  if (roundType === 'tieBreaker') {
+    xhttp.send(JSON.stringify({ triviaId: lobbyData.triviaId, roundType: roundType }))
+  } else {
+    xhttp.send(JSON.stringify({ triviaId: lobbyData.triviaId, roundNumber: roundNumber, questionNumber: questionNumber }))
+  }
 }

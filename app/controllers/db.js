@@ -36,8 +36,12 @@ module.exports = {
       } else {
         const filteredQuestions = []
         result[0].responses.forEach((response) => {
-          if (response.roundNumber === req.body.roundNumber && response.questionNumber === req.body.questionNumber) {
+          if (req.body.roundType && response.roundType === 'tieBreaker') {
             filteredQuestions.push(response)
+          } else {
+            if (response.roundNumber === req.body.roundNumber && response.questionNumber === req.body.questionNumber) {
+              filteredQuestions.push(response)
+            }
           }
         })
         res.send(filteredQuestions)
@@ -322,16 +326,21 @@ module.exports = {
           error.message = error
           next(error)
         } else {
+          const dataToInsert = {
+            name: req.body.player.name.toLowerCase(),
+            uniqueId: req.body.player.uniqueId.toLowerCase(),
+            response: playerResponse
+          }
+          if (req.body.response.roundType === 'tieBreaker') {
+            dataToInsert.roundType = 'tieBreaker'
+          } else {
+            dataToInsert.roundNumber = req.body.response.roundNumber
+            dataToInsert.questionNumber = req.body.response.questionNumber
+          }
           req.app.db.collection(process.env.DB_COLLECTION_NAME_2).updateOne({ triviaId: req.body.player.triviaId },
             {
               $addToSet: {
-                responses: {
-                  name: req.body.player.name.toLowerCase(),
-                  uniqueId: req.body.player.uniqueId.toLowerCase(),
-                  roundNumber: req.body.response.roundNumber,
-                  questionNumber: req.body.response.questionNumber,
-                  response: playerResponse
-                }
+                responses: dataToInsert
               }
             }, (error, result) => {
               if (error) {
