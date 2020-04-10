@@ -78,6 +78,9 @@ io.on('connection', (socket) => {
   socket.on('host action', (data) => {
     io.to(roomCode).emit('host action', data) // CHANGE TO socket.to for actual testing
   })
+  socket.on('player responded', (data) => {
+    io.to(roomCode).emit('player responded', data) // CHANGE TO socket.to for actual testing
+  })
 })
 
 // database connection

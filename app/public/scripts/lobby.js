@@ -33,6 +33,19 @@ document.addEventListener('DOMContentLoaded', () => {
     getLobbyData()
   })
 
+  // when the player submits a response
+  socket.on('player responded', (responseData) => {
+    if (triviaData) {
+      if (responseData.response.roundType === 'tieBreaker') {
+        console.log(`${responseData.player.name} responded to the Tie Breaker`)
+        document.getElementById('hostTieBreakerToggleDisplay').click()
+      } else {
+        console.log(`${responseData.player.name} responded to Round ${responseData.response.roundNumber}, question ${responseData.response.questionNumber}`)
+        document.getElementById(`hostRound${responseData.response.roundNumber}Question${responseData.response.questionNumber}ToggleDisplay`).click()
+      }
+    }
+  })
+
   // when the host updates something
   socket.on('host action', (data) => {
     playerDisplayHostAction(data)
@@ -349,7 +362,7 @@ function playerDisplayHostAction (data) {
     htmlToInsert += `
       <p>Tie Breaker Question</p>
       <p>${data.question}</p>
-      <input id="playerTieBreakerResponse" type="text" />
+      <input id="playerTieBreakerResponse" type="number" />
       <button onClick="playerRecordResponse(${data.roundNumber}, '${data.type}', ${data.questionNumber}, 'playerTieBreakerResponse')">Submit response</button>
     `
   }
@@ -421,6 +434,7 @@ function playerPostResponseToDb (roundNumber, roundType, questionNumber, respons
     if (this.readyState === 4 && this.status === 200) {
       const responseData = JSON.parse(this.responseText)
       console.log(responseData)
+      socket.emit('player responded', responseData)
     }
   }
   xhttp.open('POST', '/lobby/recordPlayerResponse', true)
