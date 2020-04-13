@@ -1,10 +1,10 @@
 /* global triviaData, lobbyData, playerName, io, fetch, XMLHttpRequest */
 
-// web socket
 const socket = io()
+let hostCurrentQuestionDisplaying = ''
 
-// on page load
 document.addEventListener('DOMContentLoaded', () => {
+  console.log('DOMContentLoaded()')
   // update page title display
   document.getElementById('infoTriviaHost').innerHTML = lobbyData.host
   document.getElementById('infoTriviaId').innerHTML = lobbyData.triviaId
@@ -24,6 +24,9 @@ document.addEventListener('DOMContentLoaded', () => {
     window.setTimeout(() => {
       console.log(`${playerName}, ${playerId} joined the lobby!`)
       getLobbyData()
+      if (hostCurrentQuestionDisplaying !== 'test') {
+        hostPerformAction(hostCurrentQuestionDisplaying)
+      }
     }, 2000)
   })
 
@@ -75,6 +78,7 @@ function getLobbyData () {
 }
 
 function displayLobbyData (lobbyData) {
+  console.log('displayLobbyData()')
   const lobbyList = document.querySelector('.lobby__players')
   lobbyList.innerHTML = ''
   let htmlToInsert = ''
@@ -87,8 +91,7 @@ function displayLobbyData (lobbyData) {
 }
 
 function participantDisplayContent () {
-  console.log(triviaData)
-  // console.log(lobbyData)
+  console.log('participantDisplayContent()')
   if (triviaData) {
     // display host content
     document.querySelector('.lobby__host').style.display = 'block'
@@ -111,12 +114,12 @@ function participantDisplayContent () {
       button.addEventListener('click', hostDisplayRoundButton)
     })
   } else {
-    document.querySelector('.lobby__player').style.display = 'block'
-    document.querySelector('.lobby__player__waiting').style.display = 'block'
+    playerDisplayHomeScreen()
   }
 }
 
 function participantPostToDb (name, uniqueId) {
+  console.log('participantPostToDb()')
   const xhttp = new XMLHttpRequest()
   xhttp.onreadystatechange = function () {
     if (this.readyState === 4 && this.status === 200) {
@@ -129,6 +132,7 @@ function participantPostToDb (name, uniqueId) {
 }
 
 function hostDisplayRound (roundNumber) {
+  console.log('hostDisplayRound()')
   const roundContainer = document.querySelector('.lobby__host__round-display')
   roundContainer.innerHTML = ''
   let htmlToInsert = ''
@@ -235,6 +239,7 @@ function hostDisplayRound (roundNumber) {
 }
 
 function hostDisplayTieBreaker () {
+  console.log('hostDisplayTieBreaker()')
   const roundContainer = document.querySelector('.lobby__host__round-display')
   roundContainer.innerHTML = ''
   const htmlToInsert = `
@@ -257,6 +262,7 @@ function hostDisplayTieBreaker () {
 }
 
 function hostDisplayRoundButton (event) {
+  console.log('hostDisplayRoundButton()')
   // update round display button style
   const roundButtons = document.querySelectorAll('.lobby__host__round-select__round')
   roundButtons.forEach((button) => {
@@ -274,6 +280,7 @@ function hostDisplayRoundButton (event) {
 
 function hostPerformAction (element) {
   console.log('hostPerformAction()')
+  hostCurrentQuestionDisplaying = element
   const questionToSend = {}
   if (element !== 'test' && element.id !== 'hostTieBreakerToggleDisplay') {
     // update host display
@@ -318,6 +325,13 @@ function hostPerformAction (element) {
     const questionNumber = parseInt(questionString.charAt(questionString.length - 1))
     hostGetAllResponsesForQuestion(questionToSend.type, roundNumber, questionNumber)
   }
+}
+
+function playerDisplayHomeScreen () {
+  console.log('playerDisplayHomeScreen()')
+
+  document.querySelector('.lobby__player').style.display = 'block'
+  document.querySelector('.lobby__player__waiting').style.display = 'block'
 }
 
 function playerDisplayHostAction (data) {
@@ -377,6 +391,8 @@ function playerDisplayHostAction (data) {
 
 function playerGetRecordedResponse (data, roundType) {
   console.log('playerGetRecordedResponse()')
+  // hide player waiting display
+  document.querySelector('.lobby__player__waiting').style.display = 'none'
   const xhttp = new XMLHttpRequest()
   xhttp.onreadystatechange = function () {
     if (this.readyState === 4 && this.status === 200) {
@@ -412,6 +428,7 @@ function playerGetRecordedResponse (data, roundType) {
 }
 
 function playerPostResponseToDb (roundNumber, roundType, questionNumber, response) {
+  console.log('playerPostResponseToDb()')
   const dataToSend = {
     player: {
       name: playerName,
@@ -443,6 +460,7 @@ function playerPostResponseToDb (roundNumber, roundType, questionNumber, respons
 }
 
 function playerRecordResponse (roundNumber, roundType, questionNumber, response) {
+  console.log('playerRecordResponse()')
   if (!roundNumber && !roundType && !questionNumber && !response) {
     return
   }
