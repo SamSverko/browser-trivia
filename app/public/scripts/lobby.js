@@ -62,7 +62,20 @@ document.addEventListener('DOMContentLoaded', () => {
   // to fix stupid standard js linting error
   hostPerformAction('test')
   playerRecordResponse()
+  hostMarkQuestion()
 }, false)
+
+function convertMultipleNumberResponseToLetter (responseNumber) {
+  let returnedLetter = 'A'
+  if (responseNumber === 1) {
+    returnedLetter = 'B'
+  } else if (responseNumber === 2) {
+    returnedLetter = 'C'
+  } else if (responseNumber === 3) {
+    returnedLetter = 'D'
+  }
+  return returnedLetter
+}
 
 function getLobbyData () {
   (async () => {
@@ -367,14 +380,14 @@ function hostMarkRound (roundNumber) {
           htmlToInsert += `
             <tr>
               <td>${convertMultipleNumberResponseToLetter(roundReponses[j].response)}</td>
-              <td class="text-align__center"><span class="lobby__host__round-marking__mark-button">${triviaData.rounds[roundNumber].pointValue}</span><span class="lobby__host__round-marking__mark-button lobby__host__round-marking__mark-button--half">${triviaData.rounds[roundNumber].pointValue / 2}</span> <span class="lobby__host__round-marking__mark-button lobby__host__round-marking__mark-button--wrong">0</span></td>
+              <td class="text-align__center"><span class="lobby__host__round-marking__mark-button" onClick="hostMarkQuestion(this, '${triviaData.rounds[roundNumber].type}', ${roundReponses[j].roundNumber}, ${roundReponses[j].questionNumber}, '${roundReponses[j].name}', '${roundReponses[j].uniqueId}', ${triviaData.rounds[roundNumber].pointValue})">${triviaData.rounds[roundNumber].pointValue}</span><span class="lobby__host__round-marking__mark-button lobby__host__round-marking__mark-button--half" onClick="hostMarkQuestion(this, '${triviaData.rounds[roundNumber].type}', ${roundReponses[j].roundNumber}, ${roundReponses[j].questionNumber}, '${roundReponses[j].name}', '${roundReponses[j].uniqueId}', ${triviaData.rounds[roundNumber].pointValue / 2})">${triviaData.rounds[roundNumber].pointValue / 2}</span> <span class="lobby__host__round-marking__mark-button lobby__host__round-marking__mark-button--wrong" onClick="hostMarkQuestion(this, '${triviaData.rounds[roundNumber].type}', ${roundReponses[j].roundNumber}, ${roundReponses[j].questionNumber}, '${roundReponses[j].name}', '${roundReponses[j].uniqueId}', 0)">0</span></td>
             </tr>
           `
         } else if (triviaData.rounds[roundNumber].type === 'picture' || triviaData.rounds[roundNumber].type === 'lightning') {
           htmlToInsert += `
             <tr>
               <td>${roundReponses[j].response}</td>
-              <td class="text-align__center"><span class="lobby__host__round-marking__mark-button">${triviaData.rounds[roundNumber].pointValue}</span><span class="lobby__host__round-marking__mark-button lobby__host__round-marking__mark-button--half">${triviaData.rounds[roundNumber].pointValue / 2}</span> <span class="lobby__host__round-marking__mark-button lobby__host__round-marking__mark-button--wrong">0</span></td>
+              <td class="text-align__center"><span class="lobby__host__round-marking__mark-button" onClick="hostMarkQuestion(this, '${triviaData.rounds[roundNumber].type}', ${roundReponses[j].roundNumber}, ${roundReponses[j].questionNumber}, '${roundReponses[j].name}', '${roundReponses[j].uniqueId}', ${triviaData.rounds[roundNumber].pointValue})">${triviaData.rounds[roundNumber].pointValue}</span><span class="lobby__host__round-marking__mark-button lobby__host__round-marking__mark-button--half" onClick="hostMarkQuestion(this, '${triviaData.rounds[roundNumber].type}', ${roundReponses[j].roundNumber}, ${roundReponses[j].questionNumber}, '${roundReponses[j].name}', '${roundReponses[j].uniqueId}', ${triviaData.rounds[roundNumber].pointValue / 2})">${triviaData.rounds[roundNumber].pointValue / 2}</span> <span class="lobby__host__round-marking__mark-button lobby__host__round-marking__mark-button--wrong" onClick="hostMarkQuestion(this, '${triviaData.rounds[roundNumber].type}', ${roundReponses[j].roundNumber}, ${roundReponses[j].questionNumber}, '${roundReponses[j].name}', '${roundReponses[j].uniqueId}', 0)">0</span></td>
             </tr>
           `
         }
@@ -399,7 +412,6 @@ function hostMarkTieBreaker () {
       roundReponses.push(response)
     }
   })
-  console.log(roundReponses)
   let htmlToInsert = `
     <table>
       <tr>
@@ -417,7 +429,7 @@ function hostMarkTieBreaker () {
     htmlToInsert += `
       <tr>
         <td>${response.response} (${diffSymbol}${differenceFromResponse})</td>
-        <td class="text-align__center"><span class="lobby__host__round-marking__mark-button">Winner</span></td>
+        <td class="text-align__center"><span class="lobby__host__round-marking__mark-button" onClick="hostMarkQuestion(this, 'tieBreaker', 0, 0, '${response.name}', '${response.uniqueId}', 1)">Winner</span></td>
       </tr>
     `
   })
@@ -607,10 +619,10 @@ function playerPostResponseToDb (roundNumber, roundType, questionNumber, respons
 }
 
 function playerRecordResponse (roundNumber, roundType, questionNumber, response) {
-  console.log('playerRecordResponse()')
   if (!roundNumber && !roundType && !questionNumber && !response) {
     return
   }
+  console.log('playerRecordResponse()')
   // local response display
   const responseLocation = document.getElementById('playerRecordedResponse')
   if (roundType === 'multipleChoice') {
@@ -674,14 +686,37 @@ function hostGetAllResponsesForQuestion (roundType, roundNumber, questionNumber)
   }
 }
 
-function convertMultipleNumberResponseToLetter (responseNumber) {
-  let returnedLetter = 'A'
-  if (responseNumber === 1) {
-    returnedLetter = 'B'
-  } else if (responseNumber === 2) {
-    returnedLetter = 'C'
-  } else if (responseNumber === 3) {
-    returnedLetter = 'D'
+function hostMarkQuestion (element, roundType, roundNumber, questionNumber, playerName, playerUniqueId, score) {
+  if (!element && !roundType && !roundNumber && !questionNumber && !playerName && !playerUniqueId && !score) {
+    return
   }
-  return returnedLetter
+  console.log('hostMarkQuestion()')
+  // update button displays
+  element.parentNode.querySelectorAll('.lobby__host__round-marking__mark-button').forEach((button) => {
+    button.style.opacity = 0.33
+  })
+  element.style.opacity = 1
+  // post data to db
+  console.log(roundType, roundNumber, questionNumber, playerName, playerUniqueId, score)
+  const dataToSend = {
+    triviaId: triviaData.triviaId,
+    name: playerName,
+    uniqueId: playerUniqueId,
+    roundType: roundType,
+    roundNumber: roundNumber,
+    questionNumber: questionNumber,
+    score: score
+  }
+  const xhttp = new XMLHttpRequest()
+  xhttp.onreadystatechange = function () {
+    if (this.readyState === 4 && this.status === 200) {
+      // console.log(this.responseText)
+      const responseData = JSON.parse(this.responseText)
+      console.log(responseData)
+      // socket.emit('player responded', responseData)
+    }
+  }
+  xhttp.open('POST', '/markPlayerResponse', true)
+  xhttp.setRequestHeader('Content-type', 'application/json;charset=UTF-8')
+  xhttp.send(JSON.stringify(dataToSend))
 }

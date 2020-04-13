@@ -285,6 +285,62 @@ module.exports = {
       }
     })
   },
+  markPlayerResponse: async (req, res, next) => {
+    if (req.body.roundType === 'tieBreaker') {
+      req.app.db.collection(process.env.DB_COLLECTION_NAME_2).updateOne(
+        {
+          triviaId: req.body.triviaId,
+          responses: {
+            $elemMatch: {
+              name: req.body.name.toLowerCase(),
+              uniqueId: req.body.uniqueId.toLowerCase(),
+              roundType: req.body.roundType
+            }
+          }
+        },
+        {
+          $set: {
+            'responses.$.score': req.body.score
+          }
+        }, (error, result) => {
+          if (error) {
+            const error = new Error()
+            error.statusCode = 400
+            error.message = error
+            next(error)
+          } else {
+            res.send({ response: 'ok' })
+          }
+        })
+    } else {
+      req.app.db.collection(process.env.DB_COLLECTION_NAME_2).updateOne(
+        {
+          triviaId: req.body.triviaId,
+          responses: {
+            $elemMatch: {
+              name: req.body.name.toLowerCase(),
+              uniqueId: req.body.uniqueId.toLowerCase(),
+              roundNumber: req.body.roundNumber,
+              questionNumber: req.body.questionNumber
+            }
+          }
+        },
+        {
+          $set: {
+            'responses.$.score': req.body.score
+          }
+        }, (error, result) => {
+          if (error) {
+            const error = new Error()
+            error.statusCode = 400
+            error.message = error
+            next(error)
+          } else {
+            res.send({ response: 'ok' })
+          }
+        })
+    }
+  },
   removeLobbyPlayer: async (req, res, next) => {
     req.app.db.collection(process.env.DB_COLLECTION_NAME_2).updateOne({ triviaId: req.body.triviaId },
       {
