@@ -2,10 +2,11 @@
 
 const socket = io()
 let hostCurrentQuestionDisplaying = ''
+let isLeaderboardVisible = false
 
 document.addEventListener('DOMContentLoaded', () => {
-  console.log(triviaData)
-  console.log(lobbyData)
+  // console.log(triviaData)
+  // console.log(lobbyData)
   console.log('DOMContentLoaded()')
   // update page title display
   document.getElementById('infoTriviaHost').innerHTML = lobbyData.host
@@ -63,6 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
   hostPerformAction('test')
   playerRecordResponse()
   hostMarkQuestion()
+  toggleLeaderboardDisplay()
 }, false)
 
 function convertMultipleNumberResponseToLetter (responseNumber) {
@@ -77,15 +79,22 @@ function convertMultipleNumberResponseToLetter (responseNumber) {
   return returnedLetter
 }
 
-function getLobbyData () {
+function getLobbyData (reason, roundNumber) {
   (async () => {
     fetch(`${window.location.origin}/lobby/${lobbyData.triviaId}`)
       .then((response) => {
         if (response.ok) { return response.json() }
         return Promise.reject(response)
       }).then((data) => {
+        console.log('getLobbyData()')
         lobbyData = data
-        displayLobbyData(data)
+        if (reason === 'leaderboard') {
+          populateLeaderboard()
+        } else if (reason === 'marking') {
+          hostMarkRound(roundNumber)
+        } else {
+          displayLobbyData(data)
+        }
       }).catch((error) => {
         console.warn('Something went wrong.', error)
       })
@@ -124,6 +133,7 @@ function participantDisplayContent () {
     htmlToInsert += `
       <div class="lobby__host__round-play__round" id="hostPlayTieBreaker">Play Tie Breaker</div>
       <div class="lobby__host__round-mark__round" id="hostMarkTieBreaker">Mark Tie Breaker</div>
+      <div class="lobby__host__toggle-leaderboard" onClick="toggleLeaderboardDisplay(this, 'toggle')">Display Leaderboard</div>
     `
     document.querySelector('.lobby__host__round-select').insertAdjacentHTML('beforeend', htmlToInsert)
     const roundPlayButtons = document.querySelectorAll('.lobby__host__round-play__round')
@@ -150,6 +160,11 @@ function participantPostToDb (name, uniqueId) {
   xhttp.open('POST', '/lobby/addPlayer', true)
   xhttp.setRequestHeader('Content-type', 'application/json;charset=UTF-8')
   xhttp.send(JSON.stringify({ name: name, uniqueId: uniqueId, triviaId: lobbyData.triviaId }))
+}
+
+function populateLeaderboard () {
+  console.log('populateLeaderboard()')
+  console.log(lobbyData)
 }
 
 function hostDisplayRound (roundNumber) {
@@ -274,13 +289,14 @@ function hostDisplayMarkRoundButton (event) {
   roundMarkButtons.forEach((button) => {
     button.classList.remove('lobby__host__round-play__round--active')
   })
+  toggleLeaderboardDisplay('hide')
   document.getElementById(event.target.id).classList.add('lobby__host__round-play__round--active')
   // display round
   if (event.target.id === 'hostMarkTieBreaker') {
     hostMarkTieBreaker()
   } else {
     const round = parseInt(event.target.id.charAt(event.target.id.length - 1))
-    hostMarkRound(round)
+    getLobbyData('marking', round)
   }
 }
 
@@ -295,6 +311,7 @@ function hostDisplayPlayRoundButton (event) {
   roundMarkButtons.forEach((button) => {
     button.classList.remove('lobby__host__round-play__round--active')
   })
+  toggleLeaderboardDisplay('hide')
   document.getElementById(event.target.id).classList.add('lobby__host__round-play__round--active')
   // display round
   if (event.target.id === 'hostPlayTieBreaker') {
@@ -719,4 +736,36 @@ function hostMarkQuestion (element, roundType, roundNumber, questionNumber, play
   xhttp.open('POST', '/markPlayerResponse', true)
   xhttp.setRequestHeader('Content-type', 'application/json;charset=UTF-8')
   xhttp.send(JSON.stringify(dataToSend))
+}
+
+function toggleLeaderboardDisplay (toggle) {
+  if (!toggle) {
+    return
+  }
+  console.log('toggleLeaderboardDisplay()')
+
+  if (toggle === 'hide') {
+    const leaderboardContainer = document.querySelector('.all__leaderboard')
+    const toggleButton = document.querySelector('.lobby__host__toggle-leaderboard')
+
+    leaderboardContainer.style.display = 'none'
+    toggleButton.innerHTML = 'Display Leaderboard'
+    toggleButton.classList.remove('active')
+    isLeaderboardVisible = false
+  } else {
+    const leaderboardContainer = document.querySelector('.all__leaderboard')
+    const toggleButton = this.event.target
+    if (isLeaderboardVisible) {
+      leaderboardContainer.style.display = 'none'
+      toggleButton.innerHTML = 'Display Leaderboard'
+      toggleButton.classList.remove('active')
+      isLeaderboardVisible = false
+    } else {
+      getLobbyData('leaderboard')
+      leaderboardContainer.style.display = 'block'
+      toggleButton.innerHTML = 'Hide Leaderboard'
+      toggleButton.classList.add('active')
+      isLeaderboardVisible = true
+    }
+  }
 }

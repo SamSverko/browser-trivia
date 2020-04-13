@@ -17,7 +17,8 @@
   text-align: center;
 }
 .lobby__host .lobby__host__round-select .lobby__host__round-play__round,
-.lobby__host .lobby__host__round-select .lobby__host__round-mark__round {
+.lobby__host .lobby__host__round-select .lobby__host__round-mark__round,
+.lobby__host .lobby__host__round-select .lobby__host__toggle-leaderboard {
   background-color: #333333;
   border-radius: 5px;
   box-sizing: border-box;
@@ -94,6 +95,10 @@
 }
 .lobby__host .lobby__host__round-marking .lobby__host__round-marking__mark-button--wrong {
   background-color: #a20000;
+}
+
+.all__leaderboard {
+  display: none;
 }
 
 .lobby__player {

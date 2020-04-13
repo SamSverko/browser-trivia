@@ -17,7 +17,8 @@
     justify-content: center;
     text-align: center;
     .lobby__host__round-play__round,
-    .lobby__host__round-mark__round {
+    .lobby__host__round-mark__round,
+    .lobby__host__toggle-leaderboard {
       background-color: #333333;
       border-radius: 5px;
       box-sizing: border-box;
@@ -100,6 +101,10 @@
       background-color: #a20000; 
     }
   }
+}
+
+.all__leaderboard {
+  display: none;
 }
 
 .lobby__player {
