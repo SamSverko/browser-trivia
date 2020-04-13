@@ -16,10 +16,8 @@
     flex-wrap: wrap;
     justify-content: center;
     text-align: center;
-    p {
-      width: 100%;
-    }
-    .lobby__host__round-select__round {
+    .lobby__host__round-play__round,
+    .lobby__host__round-mark__round {
       background-color: #333333;
       border-radius: 5px;
       box-sizing: border-box;
@@ -27,9 +25,9 @@
       cursor: pointer;
       margin: 10px;
       padding: 10px;
-      width: 33%;
+      width: calc(50% - 20px);
     }
-    .lobby__host__round-select__round--active {
+    .lobby__host__round-play__round--active {
       background-color: green;
     }
   }
@@ -59,6 +57,47 @@
     .lobby__host__round-display__questions__question__player-responses {
       text-align: center;
       width: 100%;
+    }
+  }
+  .lobby__host__round-marking {
+    table {
+      border: 1px solid black;
+      border-collapse: collapse;
+      box-sizing: border-box;
+      padding: 5px 10px;
+      table-layout: fixed;
+      width: 100%;
+      td {
+        border: 1px solid grey;
+        padding: 5px 10px;
+      }
+      th {
+        background-color: #CCCCCC;
+        padding: 5px 10px;
+      }
+      tr:first-child {
+        th {
+        background-color: #333333;
+        color: white;
+        }
+      }
+    }
+    .lobby__host__round-marking__mark-button {
+      background-color: darkgreen;
+      border: none;
+      border-radius: 5px;
+      box-sizing: border-box;
+      color: white;
+      cursor: pointer;
+      display: inline-block;
+      margin: 5px;
+      padding: 5px 15px;
+    }
+    .lobby__host__round-marking__mark-button--half {
+      background-color: darkorange;
+    }
+    .lobby__host__round-marking__mark-button--wrong {
+      background-color: #a20000; 
     }
   }
 }

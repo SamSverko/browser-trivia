@@ -24,4 +24,8 @@ h1, p {
   color: red;
 }
 
+.text-align__center {
+  text-align: center;
+}
+
 /*# sourceMappingURL=global.css.map */

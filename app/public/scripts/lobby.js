@@ -4,6 +4,8 @@ const socket = io()
 let hostCurrentQuestionDisplaying = ''
 
 document.addEventListener('DOMContentLoaded', () => {
+  console.log(triviaData)
+  console.log(lobbyData)
   console.log('DOMContentLoaded()')
   // update page title display
   document.getElementById('infoTriviaHost').innerHTML = lobbyData.host
@@ -102,16 +104,22 @@ function participantDisplayContent () {
     let htmlToInsert = ''
     for (let i = 0; i < triviaData.rounds.length; i++) {
       htmlToInsert += `
-        <div class="lobby__host__round-select__round" id="hostSelectRound${i}">Round ${i + 1}</div>
+        <div class="lobby__host__round-play__round" id="hostPlayRound${i}">Play Round ${i + 1}</div>
+        <div class="lobby__host__round-mark__round" id="hostMarkRound${i}">Mark Round ${i + 1}</div>
       `
     }
     htmlToInsert += `
-      <div class="lobby__host__round-select__round" id="hostSelectTieBreaker">Tie Breaker</div>
+      <div class="lobby__host__round-play__round" id="hostPlayTieBreaker">Play Tie Breaker</div>
+      <div class="lobby__host__round-mark__round" id="hostMarkTieBreaker">Mark Tie Breaker</div>
     `
     document.querySelector('.lobby__host__round-select').insertAdjacentHTML('beforeend', htmlToInsert)
-    const roundButtons = document.querySelectorAll('.lobby__host__round-select__round')
-    roundButtons.forEach((button) => {
-      button.addEventListener('click', hostDisplayRoundButton)
+    const roundPlayButtons = document.querySelectorAll('.lobby__host__round-play__round')
+    roundPlayButtons.forEach((button) => {
+      button.addEventListener('click', hostDisplayPlayRoundButton)
+    })
+    const roundMarkButtons = document.querySelectorAll('.lobby__host__round-mark__round')
+    roundMarkButtons.forEach((button) => {
+      button.addEventListener('click', hostDisplayMarkRoundButton)
     })
   } else {
     playerDisplayHomeScreen()
@@ -133,6 +141,10 @@ function participantPostToDb (name, uniqueId) {
 
 function hostDisplayRound (roundNumber) {
   console.log('hostDisplayRound()')
+  // hide marking round
+  const roundMarkContainer = document.querySelector('.lobby__host__round-marking')
+  roundMarkContainer.innerHTML = ''
+  // display playing round
   const roundContainer = document.querySelector('.lobby__host__round-display')
   roundContainer.innerHTML = ''
   let htmlToInsert = ''
@@ -238,6 +250,48 @@ function hostDisplayRound (roundNumber) {
   roundContainer.insertAdjacentHTML('beforeend', htmlToInsert)
 }
 
+function hostDisplayMarkRoundButton (event) {
+  console.log('hostDisplayMarkRoundButton()')
+  // update round display button style
+  const roundPlayButtons = document.querySelectorAll('.lobby__host__round-play__round')
+  roundPlayButtons.forEach((button) => {
+    button.classList.remove('lobby__host__round-play__round--active')
+  })
+  const roundMarkButtons = document.querySelectorAll('.lobby__host__round-mark__round')
+  roundMarkButtons.forEach((button) => {
+    button.classList.remove('lobby__host__round-play__round--active')
+  })
+  document.getElementById(event.target.id).classList.add('lobby__host__round-play__round--active')
+  // display round
+  if (event.target.id === 'hostMarkTieBreaker') {
+    hostMarkTieBreaker()
+  } else {
+    const round = parseInt(event.target.id.charAt(event.target.id.length - 1))
+    hostMarkRound(round)
+  }
+}
+
+function hostDisplayPlayRoundButton (event) {
+  console.log('hostDisplayPlayRoundButton()')
+  // update round display button style
+  const roundPlayButtons = document.querySelectorAll('.lobby__host__round-play__round')
+  roundPlayButtons.forEach((button) => {
+    button.classList.remove('lobby__host__round-play__round--active')
+  })
+  const roundMarkButtons = document.querySelectorAll('.lobby__host__round-mark__round')
+  roundMarkButtons.forEach((button) => {
+    button.classList.remove('lobby__host__round-play__round--active')
+  })
+  document.getElementById(event.target.id).classList.add('lobby__host__round-play__round--active')
+  // display round
+  if (event.target.id === 'hostPlayTieBreaker') {
+    hostDisplayTieBreaker()
+  } else {
+    const round = parseInt(event.target.id.charAt(event.target.id.length - 1))
+    hostDisplayRound(round)
+  }
+}
+
 function hostDisplayTieBreaker () {
   console.log('hostDisplayTieBreaker()')
   const roundContainer = document.querySelector('.lobby__host__round-display')
@@ -261,21 +315,114 @@ function hostDisplayTieBreaker () {
   roundContainer.insertAdjacentHTML('beforeend', htmlToInsert)
 }
 
-function hostDisplayRoundButton (event) {
-  console.log('hostDisplayRoundButton()')
-  // update round display button style
-  const roundButtons = document.querySelectorAll('.lobby__host__round-select__round')
-  roundButtons.forEach((button) => {
-    button.classList.remove('lobby__host__round-select__round--active')
+function hostMarkRound (roundNumber) {
+  console.log('hostMarkRound()')
+  // hide playing round
+  const roundPlayContainer = document.querySelector('.lobby__host__round-display')
+  roundPlayContainer.innerHTML = ''
+  // display marking round
+  const roundMarkContainer = document.querySelector('.lobby__host__round-marking')
+  roundMarkContainer.innerHTML = ''
+  let htmlToInsert = `
+    <table>
+      <tr>
+        <th>Player answer</th>
+        <th>Mark</th>
+      </tr>
+  `
+  const roundReponses = []
+  lobbyData.responses.forEach((response) => {
+    if (response.roundNumber === roundNumber) {
+      roundReponses.push(response)
+    }
   })
-  document.getElementById(event.target.id).classList.add('lobby__host__round-select__round--active')
-  // display round
-  if (event.target.id === 'hostSelectTieBreaker') {
-    hostDisplayTieBreaker()
-  } else {
-    const round = parseInt(event.target.id.charAt(event.target.id.length - 1))
-    hostDisplayRound(round)
+  console.log(roundReponses)
+  const questionsOrPictures = (triviaData.rounds[roundNumber].type === 'multipleChoice' || triviaData.rounds[roundNumber].type === 'lightning') ? 'questions' : 'pictures'
+  for (let i = 0; i < triviaData.rounds[roundNumber][questionsOrPictures].length; i++) {
+    if (triviaData.rounds[roundNumber].type === 'multipleChoice') {
+      htmlToInsert += `
+        <tr>
+          <th>Q${i + 1}: ${triviaData.rounds[roundNumber][questionsOrPictures][i].question}</th>
+          <th>A: ${convertMultipleNumberResponseToLetter(triviaData.rounds[roundNumber][questionsOrPictures][i].answer)}</th>
+        </tr>
+      `
+    } else if (triviaData.rounds[roundNumber].type === 'picture') {
+      htmlToInsert += `
+        <tr>
+          <th>Image ${i + 1}</th>
+          <th>A: ${triviaData.rounds[roundNumber][questionsOrPictures][i].answer}</th>
+        </tr>
+      `
+    } else if (triviaData.rounds[roundNumber].type === 'lightning') {
+      htmlToInsert += `
+        <tr>
+          <th>Q${i + 1}: ${triviaData.rounds[roundNumber][questionsOrPictures][i].question}</th>
+          <th>A: ${triviaData.rounds[roundNumber][questionsOrPictures][i].answer}</th>
+        </tr>
+      `
+    }
+    for (let j = 0; j < roundReponses.length; j++) {
+      if (roundReponses[j].questionNumber === i) {
+        if (triviaData.rounds[roundNumber].type === 'multipleChoice') {
+          htmlToInsert += `
+            <tr>
+              <td>${convertMultipleNumberResponseToLetter(roundReponses[j].response)}</td>
+              <td class="text-align__center"><span class="lobby__host__round-marking__mark-button">${triviaData.rounds[roundNumber].pointValue}</span><span class="lobby__host__round-marking__mark-button lobby__host__round-marking__mark-button--half">${triviaData.rounds[roundNumber].pointValue / 2}</span> <span class="lobby__host__round-marking__mark-button lobby__host__round-marking__mark-button--wrong">0</span></td>
+            </tr>
+          `
+        } else if (triviaData.rounds[roundNumber].type === 'picture' || triviaData.rounds[roundNumber].type === 'lightning') {
+          htmlToInsert += `
+            <tr>
+              <td>${roundReponses[j].response}</td>
+              <td class="text-align__center"><span class="lobby__host__round-marking__mark-button">${triviaData.rounds[roundNumber].pointValue}</span><span class="lobby__host__round-marking__mark-button lobby__host__round-marking__mark-button--half">${triviaData.rounds[roundNumber].pointValue / 2}</span> <span class="lobby__host__round-marking__mark-button lobby__host__round-marking__mark-button--wrong">0</span></td>
+            </tr>
+          `
+        }
+      }
+    }
   }
+  htmlToInsert += '</table>'
+  roundMarkContainer.insertAdjacentHTML('beforeend', htmlToInsert)
+}
+
+function hostMarkTieBreaker () {
+  console.log('hostMarkTieBreaker()')
+  // hide playing round
+  const roundPlayContainer = document.querySelector('.lobby__host__round-display')
+  roundPlayContainer.innerHTML = ''
+  // display marking round
+  const roundMarkContainer = document.querySelector('.lobby__host__round-marking')
+  roundMarkContainer.innerHTML = ''
+  const roundReponses = []
+  lobbyData.responses.forEach((response) => {
+    if (response.roundType === 'tieBreaker') {
+      roundReponses.push(response)
+    }
+  })
+  console.log(roundReponses)
+  let htmlToInsert = `
+    <table>
+      <tr>
+        <th>Player answer</th>
+        <th>Mark</th>
+      </tr>
+      <tr>
+        <th>Q: ${triviaData.tieBreaker.question}</th>
+        <th>A: ${triviaData.tieBreaker.answer}</th>
+      </tr>
+  `
+  roundReponses.forEach((response) => {
+    const differenceFromResponse = response.response - triviaData.tieBreaker.answer
+    const diffSymbol = (differenceFromResponse >= 0) ? '+' : ''
+    htmlToInsert += `
+      <tr>
+        <td>${response.response} (${diffSymbol}${differenceFromResponse})</td>
+        <td class="text-align__center"><span class="lobby__host__round-marking__mark-button">Winner</span></td>
+      </tr>
+    `
+  })
+  htmlToInsert += '</table>'
+  roundMarkContainer.insertAdjacentHTML('beforeend', htmlToInsert)
 }
 
 function hostPerformAction (element) {
@@ -525,4 +672,16 @@ function hostGetAllResponsesForQuestion (roundType, roundNumber, questionNumber)
     xhttp.setRequestHeader('Content-type', 'application/json;charset=UTF-8')
     xhttp.send(JSON.stringify({ triviaId: lobbyData.triviaId, roundNumber: roundNumber, questionNumber: questionNumber }))
   }
+}
+
+function convertMultipleNumberResponseToLetter (responseNumber) {
+  let returnedLetter = 'A'
+  if (responseNumber === 1) {
+    returnedLetter = 'B'
+  } else if (responseNumber === 2) {
+    returnedLetter = 'C'
+  } else if (responseNumber === 3) {
+    returnedLetter = 'D'
+  }
+  return returnedLetter
 }
