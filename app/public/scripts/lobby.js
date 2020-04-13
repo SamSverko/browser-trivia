@@ -164,7 +164,46 @@ function participantPostToDb (name, uniqueId) {
 
 function populateLeaderboard () {
   console.log('populateLeaderboard()')
-  console.log(lobbyData)
+  // group by player and sum all scores by round
+  const groupedPlayers = Object.values(lobbyData.responses.reduce((r, { name, uniqueId, roundNumber, score }) => {
+    r[uniqueId] = r[uniqueId] || { name, uniqueId, scores: [] }
+    r[uniqueId].scores[roundNumber] = (r[uniqueId].scores[roundNumber] || 0) + score
+    return r
+  }, {}))
+  // sum total score for each player
+  const arrSum = arr => arr.reduce((a, b) => a + b, 0)
+  groupedPlayers.forEach((player) => {
+    player.totalScore = arrSum(player.scores)
+  })
+  // sort players by rank
+  const sortedPlayers = groupedPlayers.sort((a, b) => {
+    return b.totalScore - a.totalScore
+  })
+  // insert to html
+  const leaderboardList = document.querySelector('.all__leaderboard__list')
+  leaderboardList.innerHTML = ''
+  let htmlToInsert = `
+    <table>
+      <tr>
+        <th>#</th>
+        <th>Player</th>
+        <th>Points</th>
+      </tr>
+  `
+  let counter = 0
+  sortedPlayers.forEach((player) => {
+    counter++
+    htmlToInsert += `
+      <tr>
+        <td>${counter}</td>
+        <td>${player.name}</td>
+        <td>${player.totalScore}</td>
+      </tr>
+    `
+  })
+  htmlToInsert += '</table>'
+  leaderboardList.insertAdjacentHTML('beforeend', htmlToInsert)
+  console.log(sortedPlayers)
 }
 
 function hostDisplayRound (roundNumber) {
