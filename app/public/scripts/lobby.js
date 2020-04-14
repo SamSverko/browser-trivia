@@ -386,6 +386,8 @@ function hostDisplayTieBreaker () {
 
 function hostMarkRound (roundNumber) {
   console.log('hostMarkRound()')
+  // update display for players
+  socket.emit('host action', 'marking')
   // hide playing round
   const roundPlayContainer = document.querySelector('.lobby__host__round-display')
   roundPlayContainer.innerHTML = ''
@@ -551,57 +553,64 @@ function playerDisplayHomeScreen () {
 
 function playerDisplayHostAction (data) {
   console.log('playerRecordedResponse()')
-  const questionContainer = document.querySelector('.lobby__player__round-display')
-  questionContainer.innerHTML = ''
-  let htmlToInsert = ''
-  if (data.type !== 'tieBreaker') {
-    htmlToInsert += `
-      <p>Round ${data.roundNumber + 1}</p>
-      <p>Round Type: ${data.type}</p>
-      <p>Round Theme: ${data.theme}</p>
-      <p>Point Value: ${data.pointValue}</p>
-    `
-    if (data.type === 'multipleChoice') {
+  if (data === 'marking') {
+    console.log('marking')
+    document.querySelector('.lobby__player__round-display').style.display = 'none'
+    document.querySelector('.lobby__player__waiting').style.display = 'block'
+  } else {
+    const questionContainer = document.querySelector('.lobby__player__round-display')
+    questionContainer.style.display = 'block'
+    questionContainer.innerHTML = ''
+    let htmlToInsert = ''
+    if (data.type !== 'tieBreaker') {
       htmlToInsert += `
-      <p>Question ${data.questionNumber + 1}</p>
-      <p>${data.question}</p>
-      <ul class="lobby__player__round-display__multiple__options">
-        <li onClick="playerRecordResponse(${data.roundNumber}, '${data.type}', ${data.questionNumber}, 0)">A) ${data.options[0]}</li>
-        <li onClick="playerRecordResponse(${data.roundNumber}, '${data.type}', ${data.questionNumber}, 1)">B) ${data.options[1]}</li>
-        <li onClick="playerRecordResponse(${data.roundNumber}, '${data.type}', ${data.questionNumber}, 2)">C) ${data.options[2]}</li>
-        <li onClick="playerRecordResponse(${data.roundNumber}, '${data.type}', ${data.questionNumber}, 3)">D) ${data.options[3]}</li>
-      </ul>
+        <p>Round ${data.roundNumber + 1}</p>
+        <p>Round Type: ${data.type}</p>
+        <p>Round Theme: ${data.theme}</p>
+        <p>Point Value: ${data.pointValue}</p>
       `
-    } else if (data.type === 'picture') {
+      if (data.type === 'multipleChoice') {
+        htmlToInsert += `
+        <p>Question ${data.questionNumber + 1}</p>
+        <p>${data.question}</p>
+        <ul class="lobby__player__round-display__multiple__options">
+          <li onClick="playerRecordResponse(${data.roundNumber}, '${data.type}', ${data.questionNumber}, 0)">A) ${data.options[0]}</li>
+          <li onClick="playerRecordResponse(${data.roundNumber}, '${data.type}', ${data.questionNumber}, 1)">B) ${data.options[1]}</li>
+          <li onClick="playerRecordResponse(${data.roundNumber}, '${data.type}', ${data.questionNumber}, 2)">C) ${data.options[2]}</li>
+          <li onClick="playerRecordResponse(${data.roundNumber}, '${data.type}', ${data.questionNumber}, 3)">D) ${data.options[3]}</li>
+        </ul>
+        `
+      } else if (data.type === 'picture') {
+        htmlToInsert += `
+        <p>Picture ${data.questionNumber + 1}</p>
+        <img src="${data.url}" />
+        <input id="playerPictureResponse" type="text" />
+        <button onClick="playerRecordResponse(${data.roundNumber}, '${data.type}', ${data.questionNumber}, 'playerPictureResponse')">Submit response</button>
+        `
+      } else if (data.type === 'lightning') {
+        htmlToInsert += `
+        <p>Question ${data.questionNumber + 1}</p>
+        <p>${data.question}</p>
+        <input id="playerLightningResponse" type="text" />
+        <button onClick="playerRecordResponse(${data.roundNumber}, '${data.type}', ${data.questionNumber}, 'playerLightningResponse')">Submit response</button>
+        `
+      }
+    } else if (data.type === 'tieBreaker') {
       htmlToInsert += `
-      <p>Picture ${data.questionNumber + 1}</p>
-      <img src="${data.url}" />
-      <input id="playerPictureResponse" type="text" />
-      <button onClick="playerRecordResponse(${data.roundNumber}, '${data.type}', ${data.questionNumber}, 'playerPictureResponse')">Submit response</button>
-      `
-    } else if (data.type === 'lightning') {
-      htmlToInsert += `
-      <p>Question ${data.questionNumber + 1}</p>
-      <p>${data.question}</p>
-      <input id="playerLightningResponse" type="text" />
-      <button onClick="playerRecordResponse(${data.roundNumber}, '${data.type}', ${data.questionNumber}, 'playerLightningResponse')">Submit response</button>
+        <p>Tie Breaker Question</p>
+        <p>${data.question}</p>
+        <input id="playerTieBreakerResponse" type="number" />
+        <button onClick="playerRecordResponse(${data.roundNumber}, '${data.type}', ${data.questionNumber}, 'playerTieBreakerResponse')">Submit response</button>
       `
     }
-  } else if (data.type === 'tieBreaker') {
     htmlToInsert += `
-      <p>Tie Breaker Question</p>
-      <p>${data.question}</p>
-      <input id="playerTieBreakerResponse" type="number" />
-      <button onClick="playerRecordResponse(${data.roundNumber}, '${data.type}', ${data.questionNumber}, 'playerTieBreakerResponse')">Submit response</button>
+      <p id="playerRecordedResponse">Your response:</p>
     `
-  }
-  htmlToInsert += `
-    <p id="playerRecordedResponse">Your response:</p>
-  `
-  questionContainer.insertAdjacentHTML('beforeend', htmlToInsert)
+    questionContainer.insertAdjacentHTML('beforeend', htmlToInsert)
 
-  // get player's current response
-  playerGetRecordedResponse(data, data.type)
+    // get player's current response
+    playerGetRecordedResponse(data, data.type)
+  }
 }
 
 function playerGetRecordedResponse (data, roundType) {
