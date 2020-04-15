@@ -420,9 +420,6 @@ function hostMarkRound (roundNumber) {
 
 function hostMarkTieBreaker () {
   // console.log('hostMarkTieBreaker()')
-  // hide playing round
-  const roundPlayContainer = document.querySelector('.lobby__host__round-display')
-  roundPlayContainer.innerHTML = ''
   // display marking round
   const roundMarkContainer = document.querySelector('.lobby__host__round-marking')
   roundMarkContainer.innerHTML = ''
@@ -716,6 +713,11 @@ function hostMarkQuestion (element, roundType, roundNumber, questionNumber, play
   element.parentNode.querySelectorAll('.lobby__host__round-marking__mark-button').forEach((button) => {
     button.style.opacity = 0.33
   })
+  if (roundType === 'tieBreaker') {
+    document.querySelectorAll('.lobby__host__round-marking__mark-button').forEach((button) => {
+      button.style.opacity = 0.33
+    })
+  }
   element.style.opacity = 1
   // post data to db
   console.log(roundType, roundNumber, questionNumber, playerName, playerUniqueId, score)
