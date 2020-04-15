@@ -75,8 +75,8 @@ io.on('connection', (socket) => {
       req.end()
     })
   })
-  socket.on('host action', (data) => {
-    io.to(roomCode).emit('host action', data) // CHANGE TO socket.to for actual testing
+  socket.on('host action', (reason, data) => {
+    io.to(roomCode).emit('host action', reason, data) // CHANGE TO socket.to for actual testing
   })
   socket.on('player responded', (data) => {
     io.to(roomCode).emit('player responded', data) // CHANGE TO socket.to for actual testing
