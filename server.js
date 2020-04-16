@@ -62,7 +62,7 @@ io.on('connection', (socket) => {
         }
       }
       const req = httpPost.request(options, (res) => {
-        console.log(`statusCode: ${res.statusCode}`)
+        // console.log(`statusCode: ${res.statusCode}`)
         res.on('data', (d) => {
           process.stdout.write(d)
           io.to(roomCode).emit('player disconnected', player, playerId)

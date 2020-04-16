@@ -1,25 +1,19 @@
 // COLORS ==========================================================
-$color-black: #1D1D1D; // ratio AAA with white
-$color-grey-dark: #595959; // ratio AAA with white
-$color-grey-light: #E5E5E5; // ratio AAA with black
-$color-white: #FFFFFF; // ratio AAA with black
+$color-black: #1D1D1D; // AAA on white
+$color-grey-dark: #595959; // AAA on white
+$color-grey-light: #E5E5E5; // AAA on black
+$color-white: #FFFFFF; // AAA on black
 
-// $color-blue: rgb(49, 92, 105); // ratio AAA with white
-// $color-green: rgb(173, 226, 93); // ratio AAA with black
-// $color-green-dark: rgb(58, 87, 67); // ratio AAA with white
-// $color-green-light: rgb(207, 255, 179); // ratio AAA with black
-// $color-yellow: rgb(252, 236, 82); // ratio AAA with black
+$color-blue: #0074D9; // AA on white
+$color-green: #348360; // AA on white
+$color-purple: #B10DC9; // AA on white
+$color-red: #EB0C00; // AA on white
 
-$color-blue: #64B7AD; // ratio AAA with black
-$color-blue-dark: #264653; // ratio AAA with white
-$color-orange: #F4A261; // ratio AAA with black
-$color-orange-light: #F8C8A0; // ratio AAA with black
-$color-red: #ED9680; // ratio AAA with black
-$color-yellow: #FCEC52; // ratio AAA with black
+// NON-TEXT
+$color-grey: #BED1ED;
 
 
 // SIZES ============================================================
-$size-nav-height: 4em;
 
 // VIEWPORTS ========================================================
 $viewport: 576px;

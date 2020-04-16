@@ -1,3 +1,11 @@
+@font-face {
+  font-family: "fontBold";
+  src: url("../../fonts/nunito-bold.ttf"), url("../../fonts/nunito-bold.woff"), url("../fonts/nunito-bold.woff2");
+}
+@font-face {
+  font-family: "fontRegular";
+  src: url("../../fonts/nunito-regular.ttf"), url("../../fonts/nunito-regular.woff"), url("../fonts/nunito-regular.woff2");
+}
 body {
   font-family: sans-serif;
   font-size: 18px;
@@ -6,13 +14,15 @@ body {
 }
 
 h1 {
+  font-family: "fontBold", sans-serif;
+  color: #0074D9;
   margin: 0 auto 0.5em 0;
+  padding: 0;
   text-align: center;
 }
 
-h1, p {
-  color: #1D1D1D;
-  margin: 0 0 0.5em 0;
+p {
+  margin: 0 0 0 0;
   padding: 0;
 }
 

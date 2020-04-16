@@ -83,7 +83,6 @@ module.exports = {
         } else {
           result[0].responses.forEach((response) => {
             if (response.name === req.body.name && response.uniqueId === req.body.uniqueId && response.roundType === req.body.roundType) {
-              console.log(response.response)
               res.send({ response: response.response })
             }
           })

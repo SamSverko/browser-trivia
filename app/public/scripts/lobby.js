@@ -3,7 +3,6 @@
 const socket = io()
 let hostCurrentQuestionDisplaying = ''
 let isLeaderboardButtonVisible = false
-let isLeaderboardVisible = false
 
 document.addEventListener('DOMContentLoaded', () => {
   // console.log('DOMContentLoaded()')
