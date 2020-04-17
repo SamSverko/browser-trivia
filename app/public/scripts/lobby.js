@@ -99,7 +99,7 @@ function getLobbyData (reason, roundNumber) {
         return Promise.reject(response)
       }).then((data) => {
         // console.log('getLobbyData()')
-        lobbyData = data
+        lobbyData = data // TO DO: Fix this lint error (no-global-assign)
         if (reason === 'leaderboard') {
           populateLeaderboard()
         } else if (reason === 'marking') {
