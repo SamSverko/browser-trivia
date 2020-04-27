@@ -1,7 +1,7 @@
-# browser-trivia
+# browser-trivia-legacy
 
 Create your own trivia and host a game with your friends 🎉
 
 ---
 
-In the works. Coming soon!
+Will be rebuilding this in React. ooooo, ahhhhhh.
